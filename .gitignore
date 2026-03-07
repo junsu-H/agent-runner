@@ -1,0 +1,10 @@
+node_modules/
+dist/
+build/
+.gradle/
+*.class
+backend/runs/
+.workflow/
+.claude/settings.local.json
+.claude/plans/
+.claude/todos/
