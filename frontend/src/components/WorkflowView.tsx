@@ -139,7 +139,7 @@ export function WorkflowView(props: Props) {
               <span className="workflow-name-label">.md</span>
               {workflowNameDuplicate && <span className="input-error-msg">중복된 이름입니다</span>}
             </div>
-            <button type="button" onClick={() => { void generateWorkflow(); }} disabled={generatingMd || !step2Done || workflowNameDuplicate}>
+            <button type="button" onClick={() => { void generateWorkflow(); }} disabled={generatingMd || !step2Done || workflowNameDuplicate || !!generatedFile}>
               {generatingMd ? '생성 중...' : generatedFile ? '생성 성공' : '생성'}
             </button>
             {generatedFilePath && (
