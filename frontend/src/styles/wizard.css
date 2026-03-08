@@ -1,0 +1,164 @@
+/* ── Wizard Progress Bar ── */
+
+.wizard-progress-bar {
+  margin-bottom: 14px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  background: linear-gradient(180deg, #221f35, #1a1730);
+  border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+.wizard-progress-labels {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.wizard-progress-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.wizard-progress-label.done {
+  color: var(--ok);
+}
+
+/* ── Wizard Sections ── */
+
+.wizard-section {
+  margin-bottom: 8px;
+}
+
+.wizard-section-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 12px;
+  font-size: 16px;
+  color: var(--text);
+}
+
+.wizard-section-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.wizard-action-buttons {
+  justify-content: flex-end;
+  margin-bottom: 14px;
+}
+
+/* ── Skill Navigator (Step 2 sidebar) ── */
+
+.skill-navigator {
+  display: grid;
+  gap: 6px;
+}
+
+.skill-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #eef4ff;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.skill-nav-item.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #ffffff;
+}
+
+.skill-nav-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.15);
+  font-size: 11px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.skill-nav-item.active .skill-nav-num {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.skill-nav-name {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.skill-nav-check {
+  color: #8ee3a6;
+  font-size: 14px;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* ── Execution Summary (Step 3 sidebar) ── */
+
+.execution-summary {
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: rgba(242, 246, 255, 0.9);
+}
+
+.execution-summary p {
+  margin: 0;
+}
+
+/* ── Prompt Guide ── */
+
+.prompt-guide {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.guide-item {
+  padding: 8px 12px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.guide-item strong {
+  font-size: 13px;
+  color: var(--text);
+}
+
+.guide-example,
+.guide-bad,
+.guide-good {
+  margin: 4px 0 0;
+  font-size: 12px;
+  font-family: 'SFMono-Regular', Menlo, Monaco, monospace;
+  line-height: 1.5;
+}
+
+.guide-example { color: var(--muted); }
+.guide-bad { color: var(--fail); }
+.guide-good { color: var(--ok); }

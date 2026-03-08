@@ -1,0 +1,140 @@
+/* ── Chain Compact (Step 2 preview) ── */
+
+.chain-compact {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px;
+}
+
+.chain-compact-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.chain-compact-arrow {
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 700;
+  margin: 0 2px;
+}
+
+.chain-compact-node {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.08);
+  border: 1px solid var(--line);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chain-compact-node:hover {
+  border-color: var(--line-strong);
+}
+
+.chain-compact-node.active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+.chain-compact-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.15);
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.chain-compact-node.active .chain-compact-num {
+  background: rgba(255, 255, 255, 0.25);
+  color: #fff;
+}
+
+.chain-compact-check {
+  color: var(--ok);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+/* ── Execution Phases (2-step sequential) ── */
+
+.execution-phase {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card);
+  margin-bottom: 12px;
+}
+
+.execution-phase.disabled {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.execution-phase-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.execution-phase-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.execution-phase-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.execution-phase-desc {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.execution-phase-result {
+  padding: 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--card-elevated);
+  margin-bottom: 12px;
+}
+
+.execution-phase-result p {
+  margin: 4px 0;
+}
+
+.execution-phase-status {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.execution-phase-status.success {
+  color: var(--ok);
+}

@@ -1,0 +1,9 @@
+@import './styles/core.css';
+@import './styles/left-panel.css';
+@import './styles/folder-browser.css';
+@import './styles/mcp.css';
+@import './styles/wizard.css';
+@import './styles/workflow.css';
+@import './styles/chain.css';
+@import './styles/canvas.css';
+@import './styles/terminal.css';
