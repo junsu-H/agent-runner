@@ -16,7 +16,6 @@ import { useWorkflowSkills } from './useWorkflowSkills';
 export function useWorkflowState() {
   /* ── State ── */
   const [cli, setCli] = useState<SupportedCli>('claude');
-  const [projectPath, setProjectPath] = useState(defaultProjectPath);
   const [skillPath, setSkillPath] = useState('');
   const dryRun = false;
   const [selectedMcpProfiles, setSelectedMcpProfiles] = useState<string[]>([]);
@@ -68,7 +67,7 @@ export function useWorkflowState() {
     const prompts: Record<string, string> = {};
     effectiveSelectedSkills.forEach((s) => { prompts[s] = stepPrompts[s]?.trim() ?? ''; });
     return {
-      projectPath: effectiveProjectPath, issueKey: null, requestText: '', cli, dryRun,
+      projectPath: skillPath.trim(), issueKey: null, requestText: '', cli, dryRun,
       selectedSkills: effectiveSelectedSkills, stepPrompts: prompts,
       commandStepSkills: [],
       mcpProfiles: effectiveMcpProfiles,
@@ -78,9 +77,8 @@ export function useWorkflowState() {
   };
 
   /* ── Validation ── */
-  const effectiveProjectPath = projectPath.trim() || skillPath.trim();
   const validateWorkflowInput = (): boolean => {
-    if (!effectiveProjectPath) { setError('projectPath는 필수입니다.'); return false; }
+    if (!skillPath.trim()) { setError('Skill Path를 먼저 선택하세요.'); return false; }
     if (effectiveSelectedSkills.length === 0) { setError('캔버스에 스킬을 1개 이상 추가하세요.'); return false; }
     for (const skill of effectiveSelectedSkills) {
       if (!(stepPrompts[skill]?.trim())) { setError(`스킬별 프롬프트가 필요합니다: ${skill}`); return false; }
@@ -95,7 +93,7 @@ export function useWorkflowState() {
     onCatalogDragStart, onWorkflowDragStart, onCanvasDrop, onBoxDrop,
   } = useWorkflowSkills(
     selectedSkills, setSelectedSkills, setStepPrompts, setActiveSkill,
-    effectiveMcpProfiles, projectPath, workflowFilePath,
+    effectiveMcpProfiles, skillPath, workflowFilePath,
     setWorkflowNameDuplicate, setSelectedMcpProfiles,
   );
 
@@ -215,7 +213,7 @@ export function useWorkflowState() {
   const progressPercent = step3Done ? 100 : step2Done ? 66 : step1Done ? 33 : 0;
 
   return {
-    cli, setCli, projectPath, setProjectPath, effectiveProjectPath, skillPath, setSkillPath, reloadSkillsFromPath,
+    cli, setCli, skillPath, setSkillPath, reloadSkillsFromPath,
     workflowFilePath, setWorkflowFilePath, workflowNameDuplicate,
     view, setView, skillsData, selectedSkills, activeSkill, setActiveSkill,
     stepPrompts, loadingSkills, error, skillsError, skillQuery, setSkillQuery,

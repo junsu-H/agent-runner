@@ -3,7 +3,7 @@ import { mcpProfilesNoKey, mcpProfilesWithKey, mcpProfileOptions } from '../work
 
 type Props = Pick<WorkflowState,
   | 'cli' | 'setCli' | 'error'
-  | 'effectiveProjectPath' | 'setProjectPath'
+  | 'skillPath'
   | 'workflowFilePath' | 'setWorkflowFilePath' | 'workflowNameDuplicate'
   | 'selectedSkills' | 'activeSkill' | 'setActiveSkill'
   | 'stepPrompts' | 'activeSkillPrompt' | 'updateStepPrompt'
@@ -18,7 +18,7 @@ type Props = Pick<WorkflowState,
 export function WorkflowView(props: Props) {
   const {
     cli, setCli, error,
-    effectiveProjectPath, setProjectPath,
+    skillPath,
     workflowFilePath, setWorkflowFilePath, workflowNameDuplicate,
     selectedSkills, activeSkill, setActiveSkill,
     stepPrompts, activeSkillPrompt, updateStepPrompt,
@@ -130,8 +130,8 @@ export function WorkflowView(props: Props) {
           <h3>워크플로우 파일 생성</h3>
           <div style={{ marginBottom: 8 }}>
             <label className="muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>출력 경로</label>
-            <input type="text" value={effectiveProjectPath ? `${effectiveProjectPath}/.workflow` : ''} onChange={(e) => setProjectPath(e.target.value.replace(/[/\\]\.workflow\/?$/, ''))} placeholder="프로젝트 절대 경로/.workflow" style={{ width: '100%', boxSizing: 'border-box' }} />
-            <span className="muted" style={{ fontSize: 11 }}>{effectiveProjectPath ? `${effectiveProjectPath}/.workflow/${workflowFilePath || 'workflow'}.md` : ''}</span>
+            <input type="text" value={skillPath ? `${skillPath}/.workflow` : ''} readOnly placeholder="Skill Path를 먼저 선택하세요" style={{ width: '100%', boxSizing: 'border-box' }} />
+            <span className="muted" style={{ fontSize: 11 }}>{skillPath ? `${skillPath}/.workflow/${workflowFilePath || 'workflow'}.md` : ''}</span>
           </div>
           <div className="button-row" style={{ alignItems: 'center' }}>
             <div className="workflow-name-input">

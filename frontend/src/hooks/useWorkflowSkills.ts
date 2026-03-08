@@ -13,7 +13,7 @@ export function useWorkflowSkills(
   setStepPrompts: React.Dispatch<React.SetStateAction<Record<string, string>>>,
   setActiveSkill: React.Dispatch<React.SetStateAction<string | null>>,
   effectiveMcpProfiles: string[],
-  projectPath: string,
+  skillPath: string,
   workflowFilePath: string,
   setWorkflowNameDuplicate: React.Dispatch<React.SetStateAction<boolean>>,
   setSelectedMcpProfiles: React.Dispatch<React.SetStateAction<string[]>>,
@@ -62,7 +62,7 @@ export function useWorkflowSkills(
   const checkUniqueName = async () => {
     const name = workflowFilePath.trim() || 'workflow';
     try {
-      const res = await fetch(`/api/workflows/file/unique-name?projectPath=${encodeURIComponent(projectPath)}&name=${encodeURIComponent(name)}`);
+      const res = await fetch(`/api/workflows/file/unique-name?projectPath=${encodeURIComponent(skillPath)}&name=${encodeURIComponent(name)}`);
       if (!res.ok) return;
       const body = await res.json() as { uniqueName: string; exists: boolean };
       setWorkflowNameDuplicate(body.exists);
