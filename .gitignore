@@ -8,3 +8,5 @@ backend/runs/
 .claude/settings.local.json
 .claude/plans/
 .claude/todos/
+runs/
+*.tsbuildinfo
