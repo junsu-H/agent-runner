@@ -24,6 +24,8 @@ export const mcpProfilesNoKey: McpProfileOption[] = [
   { id: 'aws-observability', label: 'aws-observability', desc: 'AWS 모니터링' },
   { id: 'aws-security', label: 'aws-security', desc: 'AWS 보안 관리' },
   { id: 'datadog', label: 'datadog', desc: 'Datadog 모니터링' },
+  { id: 'opensearch', label: 'opensearch', desc: 'OpenSearch (IAM 로그인)' },
+  { id: 'old-opensearch', label: 'old-opensearch', desc: 'Old OpenSearch (ID/PW 로그인)' },
 ];
 
 export const mcpProfilesWithKey: McpProfileOption[] = [

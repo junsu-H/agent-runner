@@ -215,7 +215,7 @@ export function useWorkflowState() {
   const progressPercent = step3Done ? 100 : step2Done ? 66 : step1Done ? 33 : 0;
 
   return {
-    cli, setCli, projectPath, setProjectPath, skillPath, setSkillPath, reloadSkillsFromPath,
+    cli, setCli, projectPath, setProjectPath, effectiveProjectPath, skillPath, setSkillPath, reloadSkillsFromPath,
     workflowFilePath, setWorkflowFilePath, workflowNameDuplicate,
     view, setView, skillsData, selectedSkills, activeSkill, setActiveSkill,
     stepPrompts, loadingSkills, error, skillsError, skillQuery, setSkillQuery,
