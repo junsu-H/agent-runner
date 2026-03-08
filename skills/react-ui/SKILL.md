@@ -25,4 +25,4 @@ React + TypeScript UI 개발 스킬.
 ```bash
 cd frontend && npm run dev
 ```
-개발 서버 포트: 5173 (백엔드 21293으로 프록시)
+개발 서버 포트: 15432 (백엔드 19876으로 프록시)

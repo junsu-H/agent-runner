@@ -19,7 +19,7 @@ public class WorkflowTerminalWebSocketConfig implements WebSocketConfigurer {
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(workflowTerminalWebSocketHandler, "/api/ws/workflows/runs/*")
-                .setAllowedOriginPatterns("http://localhost:5173", "http://127.0.0.1:5173");
+                .setAllowedOriginPatterns("http://localhost:15432", "http://127.0.0.1:15432");
     }
 }
 

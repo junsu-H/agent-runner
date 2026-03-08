@@ -3,4 +3,4 @@ spring:
     name: agent-runner
 
 server:
-  port: 21293
+  port: 19876

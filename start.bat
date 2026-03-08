@@ -15,8 +15,8 @@ start "agent-runner-frontend" cmd /c "npx vite --host"
 echo.
 echo ================================================
 echo   Agent Runner
-echo   Backend  : http://localhost:21293
-echo   Frontend : http://localhost:5173
+echo   Backend  : http://localhost:19876
+echo   Frontend : http://localhost:15432
 echo ================================================
 echo.
 echo Press any key to stop all servers...

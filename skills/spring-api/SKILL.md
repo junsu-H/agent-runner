@@ -24,4 +24,4 @@ Spring Boot REST API 개발 스킬.
 ```bash
 cd backend && ./gradlew bootRun
 ```
-서버 포트: 21293
+서버 포트: 19876
