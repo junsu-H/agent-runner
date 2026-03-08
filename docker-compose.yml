@@ -3,7 +3,7 @@ services:
     build: ./backend
     container_name: agent-runner-backend
     ports:
-      - "21293:21293"
+      - "19876:19876"
     volumes:
       - ./skills:/app/skills:ro
     environment:
@@ -14,7 +14,7 @@ services:
     build: ./frontend
     container_name: agent-runner-frontend
     ports:
-      - "3000:80"
+      - "15432:80"
     depends_on:
       - backend
     restart: unless-stopped
