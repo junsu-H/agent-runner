@@ -1,0 +1,190 @@
+.workflow-canvas {
+  min-height: 80px;
+  border: 2px dashed var(--line-strong);
+  border-radius: 12px;
+  padding: 12px;
+  background: linear-gradient(180deg, #1a1730, #150f2a);
+}
+
+.canvas-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+
+.canvas-head h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.workflow-name-input {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  min-width: 0;
+}
+
+.workflow-name-label {
+  font-family: 'SFMono-Regular', Menlo, Monaco, monospace;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.workflow-name-input input {
+  flex: 1;
+  min-width: 120px;
+  padding: 6px 10px;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.08);
+  color: var(--text);
+  font-family: 'SFMono-Regular', Menlo, Monaco, monospace;
+  font-size: 13px;
+}
+
+.workflow-name-input input.input-error {
+  border-color: var(--fail);
+}
+
+.input-error-msg {
+  color: var(--fail);
+  font-size: 11px;
+  white-space: nowrap;
+  margin-left: 4px;
+}
+
+.canvas-actions {
+  margin-top: 0;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.workflow-box-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.workflow-box {
+  border: 1px solid rgba(139, 92, 246, 0.2);
+  border-radius: 10px;
+  padding: 10px 14px;
+  background: var(--card);
+  cursor: pointer;
+}
+
+.workflow-box.active {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.15);
+}
+
+.workflow-box-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+}
+
+.workflow-box-preview {
+  margin: 8px 0 0;
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.workflow-box-mode {
+  margin: 8px 0 0;
+  color: #c4b5e0;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+.skill-detail {
+  display: grid;
+  gap: 12px;
+}
+
+.skill-mode-toggle {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: rgba(139, 92, 246, 0.06);
+  color: #c4b5e0;
+}
+
+.request-list {
+  margin: 4px 0 0;
+  padding-left: 18px;
+}
+
+.skills-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.skills-tree {
+  margin-top: 8px;
+}
+
+.skills-dir-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.skills-dir-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--card);
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.skills-dir-item:hover {
+  border-color: var(--line-strong);
+  background: var(--card-elevated);
+}
+
+.skills-dir-item.active {
+  border-color: var(--accent);
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.skills-dir-icon {
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.skills-dir-name {
+  color: var(--text);
+  font-family: 'SFMono-Regular', Menlo, Monaco, monospace;
+  font-size: 12px;
+}
+
+.ghost {
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--text);
+  border: 1px solid var(--line);
+}
+
+.error-inline {
+  font-size: 13px;
+  color: var(--fail);
+}

@@ -1,0 +1,195 @@
+/* ── Prerequisites ── */
+
+.prerequisites-group {
+  border-bottom: none;
+  margin-top: auto;
+}
+
+.prereq-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.prereq-header .group-title {
+  margin-bottom: 0;
+}
+
+.prerequisites-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.prerequisites-list li {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid transparent;
+}
+
+.prerequisites-list li.prereq-installed {
+  border-color: rgba(52, 211, 153, 0.25);
+  background: rgba(52, 211, 153, 0.08);
+}
+
+.prereq-name {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 600;
+  color: var(--panel-ink);
+  white-space: nowrap;
+}
+
+.prereq-ok {
+  color: var(--ok);
+  font-size: 13px;
+}
+
+.prereq-miss {
+  color: var(--fail);
+  font-size: 13px;
+}
+
+.prereq-optional {
+  font-size: 10px;
+  font-weight: 400;
+  color: rgba(232, 224, 240, 0.45);
+  border: 1px solid rgba(232, 224, 240, 0.15);
+  border-radius: 4px;
+  padding: 0 4px;
+}
+
+.prereq-version {
+  font-size: 11px;
+  color: rgba(232, 224, 240, 0.4);
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 140px;
+}
+
+.prereq-hint {
+  font-size: 11px;
+  color: rgba(232, 224, 240, 0.45);
+  text-align: right;
+}
+
+.prereq-install-btn {
+  font-size: 11px;
+  padding: 2px 10px;
+  border-radius: 4px;
+  border: 1px solid rgba(139, 92, 246, 0.4);
+  background: rgba(139, 92, 246, 0.2);
+  color: #c4b5e0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.prereq-install-btn:hover:not(:disabled) {
+  background: rgba(139, 92, 246, 0.35);
+  color: #fff;
+}
+
+.prereq-install-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.prereq-loading {
+  color: rgba(232, 224, 240, 0.45);
+  font-style: italic;
+  justify-content: center;
+}
+
+/* ── Execution Summary Card (Step 3 main) ── */
+
+.execution-summary-card {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: linear-gradient(180deg, #221f35, #1a1730);
+}
+
+.execution-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.execution-summary-item {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.execution-summary-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.execution-summary-value {
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.execution-skill-list {
+  display: grid;
+  gap: 6px;
+}
+
+.execution-skill-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+}
+
+.execution-skill-num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+
+.execution-skill-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  flex-shrink: 0;
+}
+
+.execution-skill-preview {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--muted);
+}

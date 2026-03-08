@@ -1,0 +1,116 @@
+.mcp-setup-card {
+  border-color: rgba(139, 92, 246, 0.2);
+  background: linear-gradient(180deg, #221f35, #1a1730);
+}
+
+.mcp-profile-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.mcp-toggle-title {
+  margin: 0;
+  color: var(--text);
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mcp-summary-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mcp-summary-pill {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: rgba(139, 92, 246, 0.1);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mcp-summary-warning {
+  margin: 0;
+  color: var(--fail);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mcp-profile-groups {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.mcp-group-label {
+  margin: 0 0 6px 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.mcp-group-label.key-required {
+  color: #d97706;
+}
+
+.mcp-profile-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.mcp-profile-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--card);
+  color: var(--text);
+  font-size: 12px;
+}
+
+.mcp-profile-name {
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.mcp-profile-desc {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.mcp-key-hint {
+  font-weight: 400;
+  color: #d97706;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+.mcp-profile-grid.disabled .mcp-profile-item {
+  cursor: not-allowed;
+}
+
+.mcp-profile-item.fixed {
+  border-color: rgba(139, 92, 246, 0.25);
+  background: rgba(139, 92, 246, 0.1);
+}
+
+.mcp-profile-item small {
+  margin-left: auto;
+  color: var(--muted);
+  font-size: 11px;
+}
