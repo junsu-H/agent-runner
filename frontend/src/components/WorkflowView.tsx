@@ -3,6 +3,7 @@ import { mcpProfilesNoKey, mcpProfilesWithKey, mcpProfileOptions } from '../work
 
 type Props = Pick<WorkflowState,
   | 'cli' | 'setCli' | 'error'
+  | 'effectiveProjectPath' | 'setProjectPath'
   | 'workflowFilePath' | 'setWorkflowFilePath' | 'workflowNameDuplicate'
   | 'selectedSkills' | 'activeSkill' | 'setActiveSkill'
   | 'stepPrompts' | 'activeSkillPrompt' | 'updateStepPrompt'
@@ -17,6 +18,7 @@ type Props = Pick<WorkflowState,
 export function WorkflowView(props: Props) {
   const {
     cli, setCli, error,
+    effectiveProjectPath, setProjectPath,
     workflowFilePath, setWorkflowFilePath, workflowNameDuplicate,
     selectedSkills, activeSkill, setActiveSkill,
     stepPrompts, activeSkillPrompt, updateStepPrompt,
@@ -124,26 +126,29 @@ export function WorkflowView(props: Props) {
           )}
         </section>
 
-        {effectiveSelectedSkills.length > 1 && (
-          <section className="card">
-            <h3>워크플로우 파일 생성</h3>
-            <div className="button-row" style={{ alignItems: 'center' }}>
-              <div className="workflow-name-input">
-                <input type="text" value={workflowFilePath} onChange={(e) => setWorkflowFilePath(e.target.value)} onBlur={() => { void checkUniqueName(); }} placeholder="workflow" className={workflowNameDuplicate ? 'input-error' : ''} />
-                <span className="workflow-name-label">.md</span>
-                {workflowNameDuplicate && <span className="input-error-msg">중복된 이름입니다</span>}
-              </div>
-              <button type="button" onClick={() => { void generateWorkflow(); }} disabled={generatingMd || !step2Done || workflowNameDuplicate}>
-                {generatingMd ? '생성 중...' : '생성'}
-              </button>
-              {generatedFilePath && (
-                <button type="button" className="ghost" onClick={() => { void openGeneratedFile(); }}>
-                  확인
-                </button>
-              )}
+        <section className="card">
+          <h3>워크플로우 파일 생성</h3>
+          <div style={{ marginBottom: 8 }}>
+            <label className="muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>출력 경로</label>
+            <input type="text" value={effectiveProjectPath ? `${effectiveProjectPath}/.workflow` : ''} onChange={(e) => setProjectPath(e.target.value.replace(/[/\\]\.workflow\/?$/, ''))} placeholder="프로젝트 절대 경로/.workflow" style={{ width: '100%', boxSizing: 'border-box' }} />
+            <span className="muted" style={{ fontSize: 11 }}>{effectiveProjectPath ? `${effectiveProjectPath}/.workflow/${workflowFilePath || 'workflow'}.md` : ''}</span>
+          </div>
+          <div className="button-row" style={{ alignItems: 'center' }}>
+            <div className="workflow-name-input">
+              <input type="text" value={workflowFilePath} onChange={(e) => setWorkflowFilePath(e.target.value)} onBlur={() => { void checkUniqueName(); }} placeholder="workflow" className={workflowNameDuplicate ? 'input-error' : ''} />
+              <span className="workflow-name-label">.md</span>
+              {workflowNameDuplicate && <span className="input-error-msg">중복된 이름입니다</span>}
             </div>
-          </section>
-        )}
+            <button type="button" onClick={() => { void generateWorkflow(); }} disabled={generatingMd || !step2Done || workflowNameDuplicate}>
+              {generatingMd ? '생성 중...' : generatedFile ? '생성 성공' : '생성'}
+            </button>
+            {generatedFilePath && (
+              <button type="button" className="ghost" onClick={() => { void openGeneratedFile(); }}>
+                확인
+              </button>
+            )}
+          </div>
+        </section>
 
         {generatedFileContent && (
           <section className="card">

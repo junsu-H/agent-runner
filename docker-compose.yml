@@ -5,9 +5,12 @@ services:
     ports:
       - "19876:19876"
     volumes:
-      - ./skills:/app/skills:ro
+      - ./skills:/app/skills
+      - ./runs:/app/runs
+      - ./data:/app/data
     environment:
       - SPRING_PROFILES_ACTIVE=docker
+      - AGENT_RUNNER_DOCKER=true
     restart: unless-stopped
 
   frontend:
