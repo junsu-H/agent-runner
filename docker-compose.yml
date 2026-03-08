@@ -1,0 +1,20 @@
+services:
+  backend:
+    build: ./backend
+    container_name: agent-runner-backend
+    ports:
+      - "21293:21293"
+    volumes:
+      - ./skills:/app/skills:ro
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+    restart: unless-stopped
+
+  frontend:
+    build: ./frontend
+    container_name: agent-runner-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+    restart: unless-stopped
