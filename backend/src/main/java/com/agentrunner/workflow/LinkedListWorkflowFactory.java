@@ -48,7 +48,7 @@ public class LinkedListWorkflowFactory {
         }
 
         Map<String, String> stepPrompts = request.normalizedStepPrompts();
-        SkillListResponse skillCatalog = loadSkillCatalog();
+        SkillListResponse skillCatalog = loadSkillCatalog(request.projectPath());
         Map<String, SkillDirectoryResponse> byName = indexByName(skillCatalog.skills());
 
         List<WorkflowPromptBuilder.PlannedStepSpec> plannedSteps = new ArrayList<>();
@@ -139,9 +139,9 @@ public class LinkedListWorkflowFactory {
         return nodes.get(0);
     }
 
-    private SkillListResponse loadSkillCatalog() {
+    private SkillListResponse loadSkillCatalog(String projectPath) {
         try {
-            return skillDirectoryService.listSkills(null);
+            return skillDirectoryService.listSkills(projectPath);
         } catch (IOException e) {
             throw new IllegalStateException("Failed to read skills directory", e);
         }
@@ -169,7 +169,7 @@ public class LinkedListWorkflowFactory {
         }
 
         Map<String, String> stepPrompts = request.normalizedStepPrompts();
-        SkillListResponse skillCatalog = loadSkillCatalog();
+        SkillListResponse skillCatalog = loadSkillCatalog(request.projectPath());
         Map<String, SkillDirectoryResponse> byName = indexByName(skillCatalog.skills());
 
         StringBuilder prompt = new StringBuilder();
