@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: agent-runner
+
+server:
+  port: 21293
