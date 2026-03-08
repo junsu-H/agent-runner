@@ -18,6 +18,12 @@ cd "$ROOT_DIR/backend"
 ./gradlew bootRun --quiet &
 BACKEND_PID=$!
 
+echo "[agent-runner] Waiting for backend to be ready..."
+until curl -sf http://localhost:19876/api/prerequisites/check > /dev/null 2>&1; do
+  sleep 2
+done
+echo "[agent-runner] Backend is ready."
+
 # --- Frontend (Vite dev :15432) ---
 echo "[agent-runner] Starting frontend..."
 cd "$ROOT_DIR/frontend"
