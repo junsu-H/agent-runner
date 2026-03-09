@@ -16,9 +16,10 @@ type Props = {
   setBrowserOpen: (open: boolean) => void;
   initialPath: string;
   onConfirm: (path: string) => void;
+  title?: string;
 };
 
-export function FolderBrowserModal({ browserOpen, setBrowserOpen, initialPath, onConfirm }: Props) {
+export function FolderBrowserModal({ browserOpen, setBrowserOpen, initialPath, onConfirm, title = '폴더 선택' }: Props) {
   const [columns, setColumns] = useState<Column[]>([]);
   const [loading, setLoading] = useState(false);
   const [addressInput, setAddressInput] = useState('');
@@ -36,7 +37,7 @@ export function FolderBrowserModal({ browserOpen, setBrowserOpen, initialPath, o
     } catch { return null; }
   }, []);
 
-  /* ── Open: load initial path ── */
+  /* ── Open: load initial path with parent hierarchy ── */
   useEffect(() => {
     if (!browserOpen) { setColumns([]); return; }
     let cancelled = false;
@@ -44,8 +45,24 @@ export function FolderBrowserModal({ browserOpen, setBrowserOpen, initialPath, o
       setLoading(true);
       const data = await fetchDirsApi(initialPath || '');
       if (!cancelled && data) {
-        setColumns([{ path: data.current, dirs: data.directories, selected: null }]);
-        setAddressInput(data.current);
+        const cols: Column[] = [];
+        // Walk up to show parent hierarchy (up to 2 levels)
+        let cur = data;
+        const ancestors: { data: DirListResponse; childPath: string }[] = [];
+        for (let i = 0; i < 2 && cur.parent; i++) {
+          const parentData = await fetchDirsApi(cur.parent);
+          if (cancelled || !parentData) break;
+          ancestors.unshift({ data: parentData, childPath: cur.current });
+          cur = parentData;
+        }
+        for (const a of ancestors) {
+          cols.push({ path: a.data.current, dirs: a.data.directories, selected: a.childPath });
+        }
+        cols.push({ path: data.current, dirs: data.directories, selected: null });
+        if (!cancelled) {
+          setColumns(cols);
+          setAddressInput(data.current);
+        }
       }
       if (!cancelled) setLoading(false);
     })();
@@ -135,7 +152,7 @@ export function FolderBrowserModal({ browserOpen, setBrowserOpen, initialPath, o
     <div className="fb-overlay" onClick={() => setBrowserOpen(false)}>
       <div className="fb-dialog fb-dialog-columns" onClick={(e) => e.stopPropagation()}>
         <div className="fb-titlebar">
-          <span className="fb-title">Skill 폴더 선택</span>
+          <span className="fb-title">{title}</span>
           <button type="button" className="fb-close" onClick={() => setBrowserOpen(false)}>&times;</button>
         </div>
 

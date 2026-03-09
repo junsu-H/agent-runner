@@ -14,7 +14,7 @@ type Props = Pick<WorkflowState,
   | 'effectiveMcpProfiles' | 'activeMcpProfileOptions' | 'toggleMcpProfile' | 'toggleAllMcpProfiles' | 'checkUniqueName'
   | 'generateWorkflow' | 'generatingMd' | 'generatedFile' | 'generatedFilePath' | 'generatedFileContent' | 'setGeneratedFileContent' | 'openGeneratedFile'
   | 'openTerminal' | 'launchingTerminal'
-  | 'workflowTab' | 'setWorkflowTab' | 'savedWorkflows' | 'loadSavedWorkflows'
+  | 'workflowTab' | 'setWorkflowTab' | 'savedWorkflows' | 'loadSavedWorkflows' | 'workflowLoadPath' | 'reloadWorkflowsFromPath'
   | 'selectedSavedWorkflow' | 'setSelectedSavedWorkflow' | 'previewSavedWorkflow' | 'openSavedWorkflowTerminal' | 'finalPromptTemplate'
   | 'step1Done' | 'step2Done' | 'step3Done' | 'progressPercent'
 >;
@@ -32,13 +32,14 @@ export function WorkflowView(props: Props) {
     effectiveMcpProfiles, activeMcpProfileOptions, toggleMcpProfile, toggleAllMcpProfiles, checkUniqueName,
     generateWorkflow, generatingMd, generatedFile, generatedFilePath, generatedFileContent, setGeneratedFileContent, openGeneratedFile,
     openTerminal, launchingTerminal,
-    workflowTab, setWorkflowTab, savedWorkflows, loadSavedWorkflows,
+    workflowTab, setWorkflowTab, savedWorkflows, loadSavedWorkflows, workflowLoadPath, reloadWorkflowsFromPath,
     selectedSavedWorkflow, setSelectedSavedWorkflow, previewSavedWorkflow, openSavedWorkflowTerminal, finalPromptTemplate,
     step1Done, step2Done, step3Done, progressPercent,
   } = props;
 
   const [browserOpen, setBrowserOpen] = useState(false);
   const [mcpBrowserOpen, setMcpBrowserOpen] = useState(false);
+  const [wfBrowserOpen, setWfBrowserOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
   const getPromptText = () => {
@@ -77,7 +78,7 @@ export function WorkflowView(props: Props) {
           </div>
         </section>
 
-        <FolderBrowserModal browserOpen={browserOpen} setBrowserOpen={setBrowserOpen} initialPath={skillPath} onConfirm={reloadSkillsFromPath} />
+        <FolderBrowserModal browserOpen={browserOpen} setBrowserOpen={setBrowserOpen} initialPath={skillPath} onConfirm={reloadSkillsFromPath} title="Skill 폴더 선택" />
 
         <section className="card">
           <div className="canvas-head">
@@ -173,8 +174,12 @@ export function WorkflowView(props: Props) {
             <>
               <div style={{ marginBottom: 8 }}>
                 <label className="muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>불러올 경로</label>
-                <input type="text" value={skillPath ? `${skillPath}/workflow` : ''} readOnly placeholder="Skill Path를 먼저 선택하세요" style={{ width: '100%', boxSizing: 'border-box' }} />
+                <div className="project-path-row">
+                  <input className="project-path-input" value={workflowLoadPath ? `${workflowLoadPath}/workflow` : ''} readOnly placeholder="경로를 선택하세요" />
+                  <button type="button" className="tiny ghost-light project-path-browse" onClick={() => setWfBrowserOpen(true)}>찾기</button>
+                </div>
               </div>
+              <FolderBrowserModal browserOpen={wfBrowserOpen} setBrowserOpen={setWfBrowserOpen} initialPath={workflowLoadPath || skillPath} onConfirm={reloadWorkflowsFromPath} title="워크플로우 폴더 선택" />
               {savedWorkflows.length === 0 ? (
                 <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>저장된 워크플로우 파일이 없습니다.</p>
               ) : (
@@ -220,7 +225,7 @@ export function WorkflowView(props: Props) {
           </div>
         </section>
 
-        <FolderBrowserModal browserOpen={mcpBrowserOpen} setBrowserOpen={setMcpBrowserOpen} initialPath={mcpProfilePath} onConfirm={reloadMcpProfilesFromPath} />
+        <FolderBrowserModal browserOpen={mcpBrowserOpen} setBrowserOpen={setMcpBrowserOpen} initialPath={mcpProfilePath} onConfirm={reloadMcpProfilesFromPath} title="MCP 프로필 폴더 선택" />
 
         <section className="card mcp-setup-card">
           <div className="mcp-profile-header">

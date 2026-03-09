@@ -252,14 +252,21 @@ export function useWorkflowState() {
   };
 
   /* ── Async: loadSavedWorkflows ── */
-  const loadSavedWorkflows = async () => {
-    if (!skillPath.trim()) { setSavedWorkflows([]); return; }
+  const [workflowLoadPath, setWorkflowLoadPath] = useState('');
+  const loadSavedWorkflows = async (customPath?: string) => {
+    const basePath = customPath ?? (workflowLoadPath || skillPath);
+    if (!basePath.trim()) { setSavedWorkflows([]); return; }
     try {
-      const res = await fetch(`/api/workflows/file/list?projectPath=${encodeURIComponent(skillPath)}`);
+      const res = await fetch(`/api/workflows/file/list?projectPath=${encodeURIComponent(basePath)}`);
       if (!res.ok) return;
       const entries: SavedWorkflow[] = await res.json();
       setSavedWorkflows(entries);
     } catch { /* ignore */ }
+  };
+  const reloadWorkflowsFromPath = (path: string) => {
+    const normalized = normPath(path);
+    setWorkflowLoadPath(normalized);
+    loadSavedWorkflows(normalized);
   };
 
   const selectSavedWorkflow = async (wf: SavedWorkflow | null) => {
@@ -317,7 +324,8 @@ export function useWorkflowState() {
   // Reload saved workflows + final prompt template when skillPath changes
   useEffect(() => {
     if (!skillPath) return;
-    loadSavedWorkflows();
+    setWorkflowLoadPath(normPath(skillPath));
+    loadSavedWorkflows(skillPath);
     // Load FINAL_PROMPT.md template
     const templatePath = normPath(skillPath) + '/FINAL_PROMPT.md';
     fetch(`/api/workflows/file/read?path=${encodeURIComponent(templatePath)}`)
@@ -353,7 +361,7 @@ export function useWorkflowState() {
     appendSkillToWorkflow, removeSelectedSkill, updateStepPrompt, toggleMcpProfile, toggleAllMcpProfiles, checkUniqueName,
     onCatalogDragStart, onWorkflowDragStart, onCanvasDrop, onBoxDrop,
     loadSkills, generateWorkflow, openTerminal,
-    workflowTab, setWorkflowTab, savedWorkflows, loadSavedWorkflows,
+    workflowTab, setWorkflowTab, savedWorkflows, loadSavedWorkflows, workflowLoadPath, reloadWorkflowsFromPath,
     selectedSavedWorkflow, setSelectedSavedWorkflow: selectSavedWorkflow, previewSavedWorkflow, openSavedWorkflowTerminal, finalPromptTemplate,
     step1Done, step2Done, step3Done, progressPercent,
   };
