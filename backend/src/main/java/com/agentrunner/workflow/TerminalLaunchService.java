@@ -132,7 +132,7 @@ public class TerminalLaunchService {
             Files.setPosixFilePermissions(tempScript, PosixFilePermissions.fromString("rwxr-xr-x"));
 
             List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
-                    "--new-window", "--command=" + tempScript.toAbsolutePath());
+                    "--command=" + tempScript.toAbsolutePath());
 
             ProcessBuilder pb = new ProcessBuilder(ghosttyCmd);
             pb.directory(Path.of(projectPath).toFile());
