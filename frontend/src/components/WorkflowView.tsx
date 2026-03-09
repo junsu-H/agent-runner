@@ -255,41 +255,39 @@ export function WorkflowView(props: Props) {
         <h3 className="wizard-section-title"><span className="wizard-section-num">5</span>실행</h3>
 
         {error && <p className="error-inline">{error}</p>}
-        {!step2Done ? (
-          <section className="card" style={{ padding: '12px 16px' }}>
-            <p className="muted" style={{ margin: 0, fontSize: 13 }}>스킬과 프롬프트를 먼저 입력하세요.</p>
-          </section>
-        ) : (
-          <>
-            <section className="card">
-              <div className="canvas-head">
-                <h3>프롬프트에 직접 입력</h3>
-                <button type="button" className="ghost tiny" onClick={() => {
-                  void navigator.clipboard.writeText(getPromptText());
-                  setCopied(true);
-                  setTimeout(() => setCopied(false), 2000);
-                }}>{copied ? '✓ 복사됨' : '클립보드에 복사'}</button>
-              </div>
-              <pre className="file-preview">{getPromptText()}</pre>
-            </section>
 
-            <section className="card">
-              <h3>터미널 실행</h3>
-              <div className="button-row">
-                <button
-                  type="button"
-                  onClick={() => { workflowTab === 'load' && selectedSavedWorkflow ? void openSavedWorkflowTerminal() : void openTerminal(); }}
-                  disabled={launchingTerminal || (effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load')}
-                >
-                  {launchingTerminal ? '실행 중...' : '터미널 실행'}
-                </button>
-                {effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
-                  <span className="muted">먼저 워크플로우 파일을 만들어 주세요</span>
-                )}
-              </div>
-            </section>
-          </>
-        )}
+        <section className="card">
+          <div className="canvas-head">
+            <h3>프롬프트에 직접 입력</h3>
+            <button type="button" className="ghost tiny" disabled={!step2Done} onClick={() => {
+              void navigator.clipboard.writeText(getPromptText());
+              setCopied(true);
+              setTimeout(() => setCopied(false), 2000);
+            }}>{copied ? '✓ 복사됨' : '클립보드에 복사'}</button>
+          </div>
+          <pre className="file-preview" style={!step2Done ? { opacity: 0.4 } : undefined}>
+            {step2Done ? getPromptText() : '스킬과 프롬프트를 먼저 입력하세요.'}
+          </pre>
+        </section>
+
+        <section className="card">
+          <h3>터미널 실행</h3>
+          <div className="button-row">
+            <button
+              type="button"
+              onClick={() => { workflowTab === 'load' && selectedSavedWorkflow ? void openSavedWorkflowTerminal() : void openTerminal(); }}
+              disabled={!step2Done || launchingTerminal || (effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load')}
+            >
+              {launchingTerminal ? '실행 중...' : '터미널 실행'}
+            </button>
+            {!step2Done && (
+              <span className="muted">스킬과 프롬프트를 먼저 입력하세요</span>
+            )}
+            {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
+              <span className="muted">먼저 워크플로우 파일을 만들어 주세요</span>
+            )}
+          </div>
+        </section>
       </div>
     </>
   );
