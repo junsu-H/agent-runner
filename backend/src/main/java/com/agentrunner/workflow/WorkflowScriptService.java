@@ -24,7 +24,7 @@ class WorkflowScriptService {
     private Path writeWorkflowScriptMac(Path runDir, String cli, String projectPath, String fileName) throws IOException {
         Path scriptPath = runDir.resolve("workflow-launch.sh");
         String nl = "\n";
-        String preFillText = getCliPreFillText(cli, fileName);
+        String preFillText = getCliPreFillText(cli, projectPath, fileName);
         String cliCommand = buildInteractiveCliCommand(cli, projectPath);
 
         StringBuilder sb = new StringBuilder();
@@ -37,6 +37,10 @@ class WorkflowScriptService {
         sb.append("echo -n ").append(shellSingleQuote(preFillText)).append(" | pbcopy").append(nl);
         sb.append("echo '[agent-runner] Cmd+V 붙여넣기 후 Enter'").append(nl);
         sb.append("echo").append(nl);
+        sb.append(nl);
+
+        // Unset CLAUDECODE to avoid "nested session" error
+        sb.append("unset CLAUDECODE").append(nl);
         sb.append(nl);
 
         // Launch CLI interactively (foreground)
@@ -53,7 +57,7 @@ class WorkflowScriptService {
     private Path writeWorkflowScriptWindows(Path runDir, String cli, String projectPath, String fileName) throws IOException {
         Path scriptPath = runDir.resolve("workflow-launch.ps1");
         String nl = "\r\n";
-        String preFillText = getCliPreFillText(cli, fileName);
+        String preFillText = getCliPreFillText(cli, projectPath, fileName);
         String cliCommand = buildInteractiveCliCommandWindows(cli, projectPath);
 
         StringBuilder sb = new StringBuilder();
@@ -64,6 +68,10 @@ class WorkflowScriptService {
         sb.append("Set-Clipboard -Value '").append(preFillText.replace("'", "''")).append("'").append(nl);
         sb.append("Write-Host \"[agent-runner] Ctrl+V -> Enter\"").append(nl);
         sb.append("Write-Host ''").append(nl);
+        sb.append(nl);
+
+        // Unset CLAUDECODE to avoid "nested session" error
+        sb.append("Remove-Item Env:CLAUDECODE -ErrorAction SilentlyContinue").append(nl);
         sb.append(nl);
 
         // Launch CLI interactively (foreground)
@@ -112,10 +120,24 @@ class WorkflowScriptService {
         }
     }
 
-    String getCliPreFillText(String cli, String fileName) {
+    private static final String DEFAULT_FINAL_PROMPT = "@workflow/{{WORKFLOW_FILE}} 이 워크플로우 plan mode로 실행해 줘.";
+
+    String getCliPreFillText(String cli, String projectPath, String fileName) {
         if ("codex".equals(cli)) {
-            return "Read the file at .workflow/" + fileName + " and execute the workflow described in it in plan mode";
+            return "Read the file at workflow/" + fileName + " and execute the workflow described in it";
         }
-        return "@.workflow/" + fileName + " plan 모드로 실행해 줘";
+        String template = loadFinalPromptTemplate(projectPath);
+        return template.replace("{{WORKFLOW_FILE}}", fileName);
+    }
+
+    private String loadFinalPromptTemplate(String projectPath) {
+        try {
+            Path file = Path.of(projectPath, "FINAL_PROMPT.md");
+            if (Files.isRegularFile(file)) {
+                return Files.readString(file, StandardCharsets.UTF_8).trim();
+            }
+        } catch (IOException ignored) {
+        }
+        return DEFAULT_FINAL_PROMPT;
     }
 }

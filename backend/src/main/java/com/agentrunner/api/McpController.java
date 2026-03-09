@@ -10,8 +10,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/mcp")
@@ -21,6 +25,50 @@ public class McpController {
 
     public McpController(McpConnectionService mcpConnectionService) {
         this.mcpConnectionService = mcpConnectionService;
+    }
+
+    public record McpProfileEntry(String id, String name) {}
+
+    @GetMapping("/profiles")
+    public ResponseEntity<?> listProfiles(
+            @RequestParam(value = "path", required = false) String pathParam
+    ) {
+        try {
+            if (pathParam == null || pathParam.isBlank()) {
+                return ResponseEntity.ok(List.of());
+            }
+
+            String expanded = pathParam.startsWith("~")
+                    ? System.getProperty("user.home") + pathParam.substring(1)
+                    : pathParam;
+            Path dir = Path.of(expanded).toAbsolutePath().normalize();
+
+            if (!Files.isDirectory(dir)) {
+                return ResponseEntity.ok(List.of());
+            }
+
+            List<McpProfileEntry> entries;
+            try (Stream<Path> stream = Files.list(dir)) {
+                entries = stream
+                        .filter(p -> !Files.isDirectory(p))
+                        .filter(p -> p.getFileName().toString().endsWith(".json"))
+                        .filter(p -> {
+                            try { return !Files.isHidden(p); } catch (IOException e) { return false; }
+                        })
+                        .sorted()
+                        .map(p -> {
+                            String fileName = p.getFileName().toString();
+                            String id = fileName.substring(0, fileName.length() - 5); // remove .json
+                            return new McpProfileEntry(id, id);
+                        })
+                        .toList();
+            }
+
+            return ResponseEntity.ok(entries);
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError()
+                    .body(Map.of("error", e.getMessage()));
+        }
     }
 
     @GetMapping("/info")
