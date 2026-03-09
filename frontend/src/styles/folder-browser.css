@@ -1,4 +1,4 @@
-/* ── Folder Browser Modal ── */
+/* ── Folder Browser Modal (Miller Columns) ── */
 
 .fb-overlay {
   position: fixed;
@@ -22,6 +22,11 @@
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
   overflow: hidden;
   color: var(--panel-ink);
+}
+
+.fb-dialog-columns {
+  width: 860px;
+  max-width: 94vw;
 }
 
 .fb-titlebar {
@@ -93,12 +98,43 @@
   font-size: 12px;
 }
 
-.fb-filelist {
+/* ── Miller Columns container ── */
+
+.fb-columns {
   flex: 1;
   min-height: 0;
-  max-height: 400px;
+  height: 380px;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  scroll-behavior: smooth;
+}
+
+.fb-column {
+  min-width: 200px;
+  max-width: 220px;
+  flex-shrink: 0;
   overflow-y: auto;
-  padding: 6px;
+  padding: 4px 0;
+  border-right: 1px solid rgba(139, 92, 246, 0.12);
+}
+
+.fb-column:last-child {
+  border-right: none;
+}
+
+.fb-column-header {
+  padding: 6px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(232, 224, 240, 0.45);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.08);
+  margin-bottom: 2px;
 }
 
 .fb-empty {
@@ -108,12 +144,22 @@
   font-size: 13px;
 }
 
+.fb-empty-col {
+  padding: 16px 10px;
+  text-align: center;
+  color: rgba(232, 224, 240, 0.3);
+  font-size: 12px;
+}
+
+/* ── Row items ── */
+
 .fb-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 7px 10px;
-  border-radius: 8px;
+  gap: 6px;
+  padding: 6px 10px;
+  margin: 1px 4px;
+  border-radius: 6px;
   cursor: pointer;
   border: 1px solid transparent;
   font-size: 13px;
@@ -125,7 +171,7 @@
 }
 
 .fb-row.selected {
-  background: rgba(139, 92, 246, 0.2);
+  background: rgba(139, 92, 246, 0.25);
   border-color: rgba(139, 92, 246, 0.4);
 }
 
@@ -135,10 +181,26 @@
 }
 
 .fb-row-name {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.fb-row-chevron {
+  flex-shrink: 0;
+  font-size: 16px;
+  font-weight: 300;
+  color: rgba(139, 92, 246, 0.3);
+  margin-left: auto;
+}
+
+.fb-row.selected .fb-row-chevron {
+  color: var(--accent);
+}
+
+/* ── Footer ── */
 
 .fb-footer {
   display: flex;

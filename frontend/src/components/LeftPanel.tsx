@@ -10,9 +10,6 @@ type Props = Pick<WorkflowState,
   | 'cli' | 'effectiveMcpProfiles'
 >;
 
-type DirEntry = { name: string; path: string };
-type DirListResponse = { current: string; parent: string | null; directories: DirEntry[] };
-
 type PrereqStatus = {
   id: string; name: string; installed: boolean; version: string;
   installCmd: string; optional: boolean;
@@ -54,48 +51,8 @@ export function LeftPanel(props: Props) {
     }
   };
 
-  /* ── Folder Browser state ── */
+  /* ── Folder Browser ── */
   const [browserOpen, setBrowserOpen] = useState(false);
-  const [browsePath, setBrowsePath] = useState('');
-  const [selectedDir, setSelectedDir] = useState<string | null>(null);
-  const [dirList, setDirList] = useState<DirEntry[]>([]);
-  const [parentPath, setParentPath] = useState<string | null>(null);
-  const [loadingDirs, setLoadingDirs] = useState(false);
-  const [addressInput, setAddressInput] = useState('');
-
-  const fetchDirs = useCallback(async (path: string) => {
-    setLoadingDirs(true);
-    setSelectedDir(null);
-    try {
-      const res = await fetch(`/api/directories?path=${encodeURIComponent(path)}`);
-      if (!res.ok) return;
-      const data: DirListResponse = await res.json();
-      setBrowsePath(data.current);
-      setAddressInput(data.current);
-      setParentPath(data.parent);
-      setDirList(data.directories);
-    } catch { /* ignore */ }
-    finally { setLoadingDirs(false); }
-  }, []);
-
-  const openBrowser = () => {
-    setBrowserOpen(true);
-    fetchDirs(skillPath || '');
-  };
-
-  const confirmSelection = () => {
-    const selected = selectedDir ?? browsePath;
-    reloadSkillsFromPath(selected);
-    setBrowserOpen(false);
-  };
-
-  useEffect(() => {
-    if (!browserOpen) {
-      setDirList([]);
-      setParentPath(null);
-      setSelectedDir(null);
-    }
-  }, [browserOpen]);
 
   return (
     <aside className="left-panel">
@@ -103,17 +60,20 @@ export function LeftPanel(props: Props) {
 
       <div className="group left-nav-group">
         <label className="group-title">화면</label>
-        <div className="left-view-tabs">
+        <nav className="left-view-tabs">
           <button type="button" className={`left-view-tab ${view === 'workflow' ? 'active' : ''}`} onClick={() => setView('workflow')}>
-            워크플로우
+            <span className="left-view-tab-label">워크플로우</span>
+            <span className="left-view-tab-chevron">›</span>
           </button>
           <button type="button" className={`left-view-tab ${view === 'skills' ? 'active' : ''}`} onClick={() => setView('skills')}>
-            SKILL 정보 보기
+            <span className="left-view-tab-label">SKILL 정보 보기</span>
+            <span className="left-view-tab-chevron">›</span>
           </button>
           <button type="button" className={`left-view-tab ${view === 'promptGuide' ? 'active' : ''}`} onClick={() => setView('promptGuide')}>
-            프롬프트 작성 요령
+            <span className="left-view-tab-label">프롬프트 작성 요령</span>
+            <span className="left-view-tab-chevron">›</span>
           </button>
-        </div>
+        </nav>
       </div>
 
       <div className="group left-project-group">
@@ -125,26 +85,18 @@ export function LeftPanel(props: Props) {
             readOnly
             placeholder="스킬 경로를 선택하세요"
           />
-          <button type="button" className="tiny ghost-light project-path-browse" onClick={openBrowser}>
+          <button type="button" className="tiny ghost-light project-path-browse" onClick={() => setBrowserOpen(true)}>
             찾기
           </button>
         </div>
       </div>
 
-      {/* ── Folder Browser Modal ── */}
+      {/* ── Folder Browser Modal (Miller columns) ── */}
       <FolderBrowserModal
         browserOpen={browserOpen}
         setBrowserOpen={setBrowserOpen}
-        browsePath={browsePath}
-        selectedDir={selectedDir}
-        setSelectedDir={setSelectedDir}
-        dirList={dirList}
-        parentPath={parentPath}
-        loadingDirs={loadingDirs}
-        addressInput={addressInput}
-        setAddressInput={setAddressInput}
-        fetchDirs={fetchDirs}
-        confirmSelection={confirmSelection}
+        initialPath={skillPath}
+        onConfirm={reloadSkillsFromPath}
       />
 
       {view === 'workflow' && (
