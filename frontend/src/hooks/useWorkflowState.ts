@@ -4,14 +4,17 @@ import type {
   RunWorkflowRequest,
   SupportedCli,
 } from '../types';
+import type { McpProfileOption } from '../workflow-constants';
 import {
   buildMcpSetupPrompt,
   defaultProjectPath,
   MainView,
-  mcpProfileOptions,
+  mcpProfileOptions as hardcodedMcpProfileOptions,
   mcpSetupSkillName,
 } from '../workflow-constants';
 import { useWorkflowSkills } from './useWorkflowSkills';
+
+const normPath = (p: string) => p.replace(/\\/g, '/');
 
 export function useWorkflowState() {
   /* ── State ── */
@@ -28,9 +31,14 @@ export function useWorkflowState() {
   const [error, setError] = useState('');
   const [skillsError, setSkillsError] = useState('');
   const [skillQuery, setSkillQuery] = useState('');
+  const [mcpProfilePath, setMcpProfilePath] = useState('');
+  const [dynamicMcpProfiles, setDynamicMcpProfiles] = useState<McpProfileOption[]>([]);
   const [workflowFilePath, _setWorkflowFilePath] = useState('workflow');
   const [workflowNameDuplicate, setWorkflowNameDuplicate] = useState(false);
   const setWorkflowFilePath = (v: string) => { _setWorkflowFilePath(v); setWorkflowNameDuplicate(false); };
+
+  // Final prompt template
+  const [finalPromptTemplate, setFinalPromptTemplate] = useState('');
 
   // Generate + Terminal state
   const [generatingMd, setGeneratingMd] = useState(false);
@@ -38,6 +46,12 @@ export function useWorkflowState() {
   const [generatedFilePath, setGeneratedFilePath] = useState<string | null>(null);
   const [generatedFileContent, setGeneratedFileContent] = useState<string | null>(null);
   const [launchingTerminal, setLaunchingTerminal] = useState(false);
+
+  // Saved workflow (불러오기) state
+  type SavedWorkflow = { name: string; path: string };
+  const [savedWorkflows, setSavedWorkflows] = useState<SavedWorkflow[]>([]);
+  const [selectedSavedWorkflow, _setSelectedSavedWorkflow] = useState<SavedWorkflow | null>(null);
+  const [workflowTab, setWorkflowTab] = useState<'create' | 'load'>('create');
 
   /* ── Derived ── */
   const availableSkills = useMemo(() => {
@@ -51,10 +65,14 @@ export function useWorkflowState() {
     return availableSkills.filter((s) => s.name.toLowerCase().includes(keyword));
   }, [availableSkills, skillQuery]);
 
+  const activeMcpProfileOptions = useMemo(() => {
+    return dynamicMcpProfiles;
+  }, [dynamicMcpProfiles]);
+
   const effectiveMcpProfiles = useMemo(() => {
     const selected = new Set(selectedMcpProfiles);
-    return mcpProfileOptions.map((o) => o.id).filter((id) => selected.has(id));
-  }, [selectedMcpProfiles]);
+    return activeMcpProfileOptions.map((o) => o.id).filter((id) => selected.has(id));
+  }, [selectedMcpProfiles, activeMcpProfileOptions]);
 
   const effectiveSelectedSkills = useMemo(() => {
     return selectedSkills.filter((s) => s !== mcpSetupSkillName);
@@ -94,7 +112,7 @@ export function useWorkflowState() {
   } = useWorkflowSkills(
     selectedSkills, setSelectedSkills, setStepPrompts, setActiveSkill,
     effectiveMcpProfiles, skillPath, workflowFilePath,
-    setWorkflowNameDuplicate, setSelectedMcpProfiles,
+    setWorkflowNameDuplicate, setSelectedMcpProfiles, activeMcpProfileOptions,
   );
 
   /* ── Async: loadSkills ── */
@@ -107,7 +125,21 @@ export function useWorkflowState() {
       if (!res.ok) throw new Error(body.error ?? `skills load failed: ${res.status}`);
       const data = body as SkillListResponse;
       setSkillsData(data);
-      if (!root) setSkillPath(data.agentRunnerRoot);
+      if (!root) {
+        setSkillPath(normPath(data.agentRunnerRoot));
+        // MCP Profile Path도 같은 디렉터리의 mcp-profiles/ 로 초기화
+        if (!mcpProfilePath) {
+          const mcpDefault = normPath(data.agentRunnerRoot) + '/mcp-profiles';
+          setMcpProfilePath(mcpDefault);
+          try {
+            const mcpRes = await fetch(`/api/mcp/profiles?path=${encodeURIComponent(mcpDefault)}`);
+            if (mcpRes.ok) {
+              const entries: { id: string; name: string }[] = await mcpRes.json();
+              setDynamicMcpProfiles(entries.map((e) => ({ id: e.id, label: e.name, desc: '' })));
+            }
+          } catch { /* ignore */ }
+        }
+      }
       const validNames = new Set(data.skills.filter((s) => s.hasSkillMd).map((s) => s.name));
       setSelectedSkills((prev) => prev.filter((n) => validNames.has(n)));
       setStepPrompts((prev) => {
@@ -136,9 +168,15 @@ export function useWorkflowState() {
       if (!res.ok) throw new Error(body.error ?? `생성 실패: ${res.status}`);
       const result = body as { fileName: string; filePath: string; skillCount: number; skills: string[] };
       setGeneratedFile(result.fileName);
-      setGeneratedFilePath(result.filePath);
+      setGeneratedFilePath(normPath(result.filePath));
+      // Auto-load file content for preview
+      try {
+        const readRes = await fetch(`/api/workflows/file/read?path=${encodeURIComponent(normPath(result.filePath))}`);
+        const readBody = await readRes.json();
+        if (readRes.ok) setGeneratedFileContent(readBody.content);
+      } catch { /* ignore */ }
     } catch (e) {
-      const msg = e instanceof Error ? e.message : '생성 실패';
+      const msg = e instanceof Error ? e.message : '만들기 실패';
       setError(msg);
     } finally {
       setGeneratingMd(false);
@@ -192,9 +230,101 @@ export function useWorkflowState() {
   useEffect(() => { loadSkills(); }, []); // initial load
 
   const reloadSkillsFromPath = (path: string) => {
-    setSkillPath(path);
+    setSkillPath(normPath(path));
     loadSkills(path);
   };
+
+  /* ── Async: loadMcpProfiles ── */
+  const loadMcpProfiles = async (path: string) => {
+    if (!path.trim()) { setDynamicMcpProfiles([]); return; }
+    try {
+      const res = await fetch(`/api/mcp/profiles?path=${encodeURIComponent(path)}`);
+      if (!res.ok) return;
+      const entries: { id: string; name: string }[] = await res.json();
+      setDynamicMcpProfiles(entries.map((e) => ({ id: e.id, label: e.name, desc: '' })));
+      setSelectedMcpProfiles([]);
+    } catch { /* ignore */ }
+  };
+
+  const reloadMcpProfilesFromPath = (path: string) => {
+    setMcpProfilePath(normPath(path));
+    loadMcpProfiles(path);
+  };
+
+  /* ── Async: loadSavedWorkflows ── */
+  const loadSavedWorkflows = async () => {
+    if (!skillPath.trim()) { setSavedWorkflows([]); return; }
+    try {
+      const res = await fetch(`/api/workflows/file/list?projectPath=${encodeURIComponent(skillPath)}`);
+      if (!res.ok) return;
+      const entries: SavedWorkflow[] = await res.json();
+      setSavedWorkflows(entries);
+    } catch { /* ignore */ }
+  };
+
+  const selectSavedWorkflow = async (wf: SavedWorkflow | null) => {
+    _setSelectedSavedWorkflow(wf);
+    if (!wf) { setGeneratedFileContent(null); setGeneratedFile(null); return; }
+    // Auto-load file content for preview
+    try {
+      const res = await fetch(`/api/workflows/file/read?path=${encodeURIComponent(wf.path)}`);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? '파일 읽기 실패');
+      setGeneratedFile(wf.name + '.md');
+      setGeneratedFileContent(body.content);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '파일 열기 실패');
+    }
+  };
+
+  const previewSavedWorkflow = async () => {
+    if (!selectedSavedWorkflow) return;
+    try {
+      const res = await fetch(`/api/workflows/file/read?path=${encodeURIComponent(selectedSavedWorkflow.path)}`);
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? '파일 읽기 실패');
+      setGeneratedFile(selectedSavedWorkflow.name + '.md');
+      setGeneratedFileContent(body.content);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '파일 열기 실패');
+    }
+  };
+
+  const openSavedWorkflowTerminal = async () => {
+    if (!selectedSavedWorkflow) return;
+    setError('');
+    setLaunchingTerminal(true);
+    try {
+      const res = await fetch('/api/workflows/linked-list/run/terminal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          projectPath: skillPath.trim(), issueKey: null, requestText: '', cli, dryRun: false,
+          selectedSkills: [], stepPrompts: {}, commandStepSkills: [],
+          mcpProfiles: effectiveMcpProfiles, openTerminalAfter: false,
+          workflowName: selectedSavedWorkflow.name,
+        }),
+      });
+      const body = await res.json();
+      if (!res.ok) throw new Error(body.error ?? `터미널 실행 실패: ${res.status}`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : '터미널 실행 실패');
+    } finally {
+      setLaunchingTerminal(false);
+    }
+  };
+
+  // Reload saved workflows + final prompt template when skillPath changes
+  useEffect(() => {
+    if (!skillPath) return;
+    loadSavedWorkflows();
+    // Load FINAL_PROMPT.md template
+    const templatePath = normPath(skillPath) + '/FINAL_PROMPT.md';
+    fetch(`/api/workflows/file/read?path=${encodeURIComponent(templatePath)}`)
+      .then((r) => r.ok ? r.json() : null)
+      .then((body) => { if (body?.content) setFinalPromptTemplate(body.content.trim()); })
+      .catch(() => { /* ignore */ });
+  }, [skillPath]);
 
   useEffect(() => {
     if (selectedSkills.length === 0) { setActiveSkill(null); return; }
@@ -214,6 +344,7 @@ export function useWorkflowState() {
 
   return {
     cli, setCli, skillPath, setSkillPath, reloadSkillsFromPath,
+    mcpProfilePath, reloadMcpProfilesFromPath, activeMcpProfileOptions,
     workflowFilePath, setWorkflowFilePath, workflowNameDuplicate,
     view, setView, skillsData, selectedSkills, activeSkill, setActiveSkill,
     stepPrompts, loadingSkills, error, skillsError, skillQuery, setSkillQuery,
@@ -222,6 +353,8 @@ export function useWorkflowState() {
     appendSkillToWorkflow, removeSelectedSkill, updateStepPrompt, toggleMcpProfile, toggleAllMcpProfiles, checkUniqueName,
     onCatalogDragStart, onWorkflowDragStart, onCanvasDrop, onBoxDrop,
     loadSkills, generateWorkflow, openTerminal,
+    workflowTab, setWorkflowTab, savedWorkflows, loadSavedWorkflows,
+    selectedSavedWorkflow, setSelectedSavedWorkflow: selectSavedWorkflow, previewSavedWorkflow, openSavedWorkflowTerminal, finalPromptTemplate,
     step1Done, step2Done, step3Done, progressPercent,
   };
 }

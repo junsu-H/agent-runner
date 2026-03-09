@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 
+const normPath = (p: string) => p.replace(/\\/g, '/');
+
 type DirEntry = { name: string; path: string };
 type DirListResponse = { current: string; parent: string | null; directories: DirEntry[] };
 
@@ -26,7 +28,11 @@ export function FolderBrowserModal({ browserOpen, setBrowserOpen, initialPath, o
     try {
       const res = await fetch(`/api/directories?path=${encodeURIComponent(path)}`);
       if (!res.ok) return null;
-      return await res.json();
+      const data: DirListResponse = await res.json();
+      data.current = normPath(data.current);
+      if (data.parent) data.parent = normPath(data.parent);
+      data.directories = data.directories.map(d => ({ ...d, path: normPath(d.path) }));
+      return data;
     } catch { return null; }
   }, []);
 

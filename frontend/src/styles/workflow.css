@@ -2,7 +2,6 @@
 
 .prerequisites-group {
   border-bottom: none;
-  margin-top: auto;
 }
 
 .prereq-header {
@@ -110,6 +109,70 @@
   color: rgba(232, 224, 240, 0.45);
   font-style: italic;
   justify-content: center;
+}
+
+/* ── Workflow File Tabs ── */
+
+.wf-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  border-bottom: 1px solid rgba(139, 92, 246, 0.15);
+  padding-bottom: 8px;
+}
+
+.wf-tab {
+  padding: 5px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  border-radius: 6px 6px 0 0;
+  background: transparent;
+  color: var(--muted);
+  border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+}
+
+.wf-tab:hover {
+  color: var(--text);
+}
+
+.wf-tab.active {
+  color: var(--accent);
+  border-bottom-color: var(--accent);
+}
+
+/* ── Saved Workflow List ── */
+
+.saved-wf-list {
+  display: grid;
+  gap: 4px;
+  margin-top: 8px;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.saved-wf-item {
+  width: 100%;
+  text-align: left;
+  padding: 8px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  border-radius: 8px;
+  background: rgba(139, 92, 246, 0.06);
+  border: 1px solid rgba(139, 92, 246, 0.15);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.saved-wf-item:hover {
+  background: rgba(139, 92, 246, 0.12);
+}
+
+.saved-wf-item.active {
+  background: rgba(139, 92, 246, 0.2);
+  border-color: var(--accent);
+  color: #fff;
 }
 
 /* ── Execution Summary Card (Step 3 main) ── */

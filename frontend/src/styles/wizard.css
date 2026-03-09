@@ -53,9 +53,27 @@
   flex-shrink: 0;
 }
 
+.wizard-section-hint {
+  font-size: 13px;
+  font-weight: 400;
+  color: var(--muted);
+}
+
 .wizard-action-buttons {
   justify-content: flex-end;
   margin-bottom: 14px;
+}
+
+/* ── Path Inputs Row (Section 2) ── */
+
+.path-inputs-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.path-input-group {
+  min-width: 0;
 }
 
 /* ── Skill Navigator (Step 2 sidebar) ── */

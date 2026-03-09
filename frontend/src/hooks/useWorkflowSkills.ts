@@ -1,8 +1,8 @@
 import { DragEvent } from 'react';
+import type { McpProfileOption } from '../workflow-constants';
 import {
   buildMcpSetupPrompt,
   dragMimeType,
-  mcpProfileOptions,
   mcpSetupSkillName,
   readDragPayload,
 } from '../workflow-constants';
@@ -17,6 +17,7 @@ export function useWorkflowSkills(
   workflowFilePath: string,
   setWorkflowNameDuplicate: React.Dispatch<React.SetStateAction<boolean>>,
   setSelectedMcpProfiles: React.Dispatch<React.SetStateAction<string[]>>,
+  activeMcpProfileOptions: McpProfileOption[],
 ) {
   /* ── Skill management ── */
   const appendSkillToWorkflow = (skillName: string) => {
@@ -48,14 +49,14 @@ export function useWorkflowSkills(
 
   /* ── MCP profile functions ── */
   const toggleMcpProfile = (profileId: string, enabled: boolean) => {
-    if (!mcpProfileOptions.find((item) => item.id === profileId)) return;
+    if (!activeMcpProfileOptions.find((item) => item.id === profileId)) return;
     setSelectedMcpProfiles((prev) =>
       enabled ? (prev.includes(profileId) ? prev : [...prev, profileId]) : prev.filter((id) => id !== profileId),
     );
   };
 
   const toggleAllMcpProfiles = (enabled: boolean) => {
-    setSelectedMcpProfiles(enabled ? mcpProfileOptions.map((p) => p.id) : []);
+    setSelectedMcpProfiles(enabled ? activeMcpProfileOptions.map((p) => p.id) : []);
   };
 
   /* ── Check unique name ── */

@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { WorkflowState } from '../hooks/useWorkflowState';
-import { FolderBrowserModal } from './FolderBrowserModal';
+
+type ProgressStep = { id: string; label: string; done: boolean };
 
 type Props = Pick<WorkflowState,
-  | 'view' | 'setView' | 'skillPath' | 'reloadSkillsFromPath'
+  | 'view' | 'setView'
   | 'skillQuery' | 'setSkillQuery' | 'filteredAvailableSkills' | 'skillsData'
   | 'onCatalogDragStart' | 'appendSkillToWorkflow'
   | 'effectiveSelectedSkills' | 'activeSkill' | 'setActiveSkill' | 'stepPrompts'
-  | 'cli' | 'effectiveMcpProfiles'
->;
+> & { progressSteps?: ProgressStep[] };
 
 type PrereqStatus = {
   id: string; name: string; installed: boolean; version: string;
@@ -18,11 +18,11 @@ type InstallState = 'idle' | 'installing' | 'success' | 'failed';
 
 export function LeftPanel(props: Props) {
   const {
-    view, setView, skillPath, reloadSkillsFromPath,
+    view, setView,
     skillQuery, setSkillQuery, filteredAvailableSkills, skillsData,
     onCatalogDragStart, appendSkillToWorkflow,
     effectiveSelectedSkills, activeSkill, setActiveSkill, stepPrompts,
-    cli, effectiveMcpProfiles,
+    progressSteps,
   } = props;
 
   /* ── Prerequisites state ── */
@@ -51,11 +51,9 @@ export function LeftPanel(props: Props) {
     }
   };
 
-  /* ── Folder Browser ── */
-  const [browserOpen, setBrowserOpen] = useState(false);
-
   return (
     <aside className="left-panel">
+      <p className="made-by">Made By junsu-H</p>
       <h2>Agent Runner</h2>
 
       <div className="group left-nav-group">
@@ -75,29 +73,6 @@ export function LeftPanel(props: Props) {
           </button>
         </nav>
       </div>
-
-      <div className="group left-project-group">
-        <label className="group-title">Skill Path</label>
-        <div className="project-path-row">
-          <input
-            className="project-path-input"
-            value={skillPath}
-            readOnly
-            placeholder="스킬 경로를 선택하세요"
-          />
-          <button type="button" className="tiny ghost-light project-path-browse" onClick={() => setBrowserOpen(true)}>
-            찾기
-          </button>
-        </div>
-      </div>
-
-      {/* ── Folder Browser Modal (Miller columns) ── */}
-      <FolderBrowserModal
-        browserOpen={browserOpen}
-        setBrowserOpen={setBrowserOpen}
-        initialPath={skillPath}
-        onConfirm={reloadSkillsFromPath}
-      />
 
       {view === 'workflow' && (
         <>
@@ -158,56 +133,68 @@ export function LeftPanel(props: Props) {
             </div>
           )}
 
-          {/* Execution Summary */}
-          <div className="group">
-            <label className="group-title">실행 요약</label>
-            <div className="execution-summary">
-              <p><strong>CLI:</strong> {cli}</p>
-              <p><strong>스킬 수:</strong> {effectiveSelectedSkills.length}개</p>
-              <p><strong>MCP:</strong> {effectiveMcpProfiles.length > 0 ? `${effectiveMcpProfiles.length} profiles` : 'None'}</p>
+          {/* Prerequisites */}
+          <div className="group prerequisites-group">
+            <div className="prereq-header">
+              <label className="group-title">필수 설치 항목</label>
+              <button type="button" className="tiny ghost-light" onClick={() => { void checkPrereqs(); }}>새로고침</button>
             </div>
+            <ul className="prerequisites-list">
+              {prereqs.map((p) => {
+                const st = installStates[p.id] ?? 'idle';
+                return (
+                  <li key={p.id} className={p.installed ? 'prereq-installed' : ''}>
+                    <span className="prereq-name">
+                      {p.installed ? <span className="prereq-ok">&#10003;</span> : <span className="prereq-miss">&#10007;</span>}
+                      {p.name}
+                      {p.optional && <span className="prereq-optional">선택</span>}
+                    </span>
+                    {p.installed ? (
+                      <span className="prereq-version">{p.version}</span>
+                    ) : p.installCmd ? (
+                      <button
+                        type="button"
+                        className="prereq-install-btn"
+                        disabled={st === 'installing'}
+                        onClick={() => { void installPrereq(p.id); }}
+                      >
+                        {st === 'installing' ? '설치 중...' : st === 'failed' ? '재시도' : '설치'}
+                      </button>
+                    ) : (
+                      <span className="prereq-hint">ghostty.org</span>
+                    )}
+                  </li>
+                );
+              })}
+              {prereqs.length === 0 && <li className="prereq-loading">확인 중...</li>}
+            </ul>
           </div>
+
+          {/* Horizontal Progress */}
+          {progressSteps && progressSteps.length > 0 && (
+            <div className="group">
+              <nav className="horizontal-progress">
+                {progressSteps.map((step, idx) => (
+                  <div key={step.id} className="hp-step-wrapper">
+                    {idx > 0 && <div className={`hp-line ${step.done ? 'done' : ''}`} />}
+                    <button
+                      type="button"
+                      className={`hp-dot ${step.done ? 'done' : ''}`}
+                      onClick={() => document.getElementById(step.id)?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                      title={step.label}
+                    >
+                      {step.done ? '\u2713' : idx + 1}
+                    </button>
+                    <span className="hp-label">{step.label}</span>
+                  </div>
+                ))}
+              </nav>
+            </div>
+          )}
         </>
       )}
 
-      {/* Prerequisites */}
-      <div className="group prerequisites-group">
-        <div className="prereq-header">
-          <label className="group-title">필수 설치 항목</label>
-          <button type="button" className="tiny ghost-light" onClick={() => { void checkPrereqs(); }}>새로고침</button>
-        </div>
-        <ul className="prerequisites-list">
-          {prereqs.map((p) => {
-            const st = installStates[p.id] ?? 'idle';
-            return (
-              <li key={p.id} className={p.installed ? 'prereq-installed' : ''}>
-                <span className="prereq-name">
-                  {p.installed ? <span className="prereq-ok">&#10003;</span> : <span className="prereq-miss">&#10007;</span>}
-                  {p.name}
-                  {p.optional && <span className="prereq-optional">선택</span>}
-                </span>
-                {p.installed ? (
-                  <span className="prereq-version">{p.version}</span>
-                ) : p.installCmd ? (
-                  <button
-                    type="button"
-                    className="prereq-install-btn"
-                    disabled={st === 'installing'}
-                    onClick={() => { void installPrereq(p.id); }}
-                  >
-                    {st === 'installing' ? '설치 중...' : st === 'failed' ? '재시도' : '설치'}
-                  </button>
-                ) : (
-                  <span className="prereq-hint">ghostty.org</span>
-                )}
-              </li>
-            );
-          })}
-          {prereqs.length === 0 && <li className="prereq-loading">확인 중...</li>}
-        </ul>
-      </div>
 
-      <p className="made-by">Made By junsu-H</p>
     </aside>
   );
 }
