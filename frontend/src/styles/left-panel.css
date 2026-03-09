@@ -10,22 +10,50 @@
 }
 
 .left-view-tabs {
-  display: grid;
-  gap: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .left-view-tab {
   width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   text-align: left;
-  background: rgba(139, 92, 246, 0.12);
-  border: 1px solid rgba(139, 92, 246, 0.25);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
   color: var(--panel-ink);
+  padding: 8px 10px;
+  transition: background 0.15s;
+}
+
+.left-view-tab:hover {
+  background: rgba(139, 92, 246, 0.1);
 }
 
 .left-view-tab.active {
-  background: var(--accent);
-  border-color: var(--accent);
+  background: rgba(139, 92, 246, 0.2);
   color: #fff;
+}
+
+.left-view-tab.active .left-view-tab-chevron {
+  color: var(--accent);
+}
+
+.left-view-tab-label {
+  flex: 1;
+  min-width: 0;
+}
+
+.left-view-tab-chevron {
+  flex-shrink: 0;
+  font-size: 18px;
+  font-weight: 300;
+  color: rgba(139, 92, 246, 0.4);
+  margin-left: 8px;
+  line-height: 1;
 }
 
 .search-label {
