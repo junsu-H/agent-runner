@@ -3,6 +3,21 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
+# --- Kill existing processes on required ports ---
+kill_port() {
+  local port=$1
+  local pids
+  pids=$(lsof -ti :"$port" 2>/dev/null || true)
+  if [ -n "$pids" ]; then
+    echo "[agent-runner] Killing existing process on port $port (PID: $pids)"
+    echo "$pids" | xargs kill -9 2>/dev/null || true
+    sleep 1
+  fi
+}
+
+kill_port 19876
+kill_port 15432
+
 cleanup() {
   echo ""
   echo "[agent-runner] Shutting down..."
