@@ -8,7 +8,7 @@ type Props = Pick<WorkflowState,
   | 'skillQuery' | 'setSkillQuery' | 'filteredAvailableSkills' | 'skillsData'
   | 'onCatalogDragStart' | 'appendSkillToWorkflow'
   | 'effectiveSelectedSkills' | 'activeSkill' | 'setActiveSkill' | 'stepPrompts'
-> & { progressSteps?: ProgressStep[] };
+> & { progressSteps?: ProgressStep[]; onStartTutorial?: () => void };
 
 type PrereqStatus = {
   id: string; name: string; installed: boolean; version: string;
@@ -22,7 +22,7 @@ export function LeftPanel(props: Props) {
     skillQuery, setSkillQuery, filteredAvailableSkills, skillsData,
     onCatalogDragStart, appendSkillToWorkflow,
     effectiveSelectedSkills, activeSkill, setActiveSkill, stepPrompts,
-    progressSteps,
+    progressSteps, onStartTutorial,
   } = props;
 
   /* ── Prerequisites state ── */
@@ -53,7 +53,9 @@ export function LeftPanel(props: Props) {
 
   return (
     <aside className="left-panel">
-      <p className="made-by">Made By junsu-H</p>
+      <button type="button" className="tutorial-start-btn" onClick={onStartTutorial}>
+        튜토리얼 시작하기
+      </button>
       <h2>Agent Runner</h2>
 
       <div className="group left-nav-group">
@@ -191,9 +193,10 @@ export function LeftPanel(props: Props) {
               </nav>
             </div>
           )}
+
+          <p className="made-by">Made By junsu-H</p>
         </>
       )}
-
 
     </aside>
   );

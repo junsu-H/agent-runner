@@ -1,13 +1,20 @@
 import { useMemo } from 'react';
 import { useWorkflowState } from './hooks/useWorkflowState';
+import { useTutorial } from './hooks/useTutorial';
 import { LeftPanel } from './components/LeftPanel';
 import { WorkflowView } from './components/WorkflowView';
 import { SkillsDirectoryView } from './components/SkillsDirectoryView';
 import { PromptGuideView } from './components/PromptGuideView';
-// VerticalProgress removed — now horizontal in LeftPanel
+import { TutorialOverlay } from './components/TutorialOverlay';
 
 export function App() {
   const state = useWorkflowState();
+  const tutorial = useTutorial();
+
+  const startTutorial = () => {
+    state.setView('workflow');
+    tutorial.startTutorial();
+  };
 
   const progressSteps = useMemo(() => [
     { id: 'step-1', label: 'CLI', done: true },
@@ -19,7 +26,7 @@ export function App() {
 
   return (
     <div className="layout">
-      <LeftPanel {...state} progressSteps={progressSteps} />
+      <LeftPanel {...state} progressSteps={progressSteps} onStartTutorial={startTutorial} />
 
       <main className="main-panel">
         {state.view === 'skills' ? (
@@ -30,6 +37,18 @@ export function App() {
           <WorkflowView {...state} />
         )}
       </main>
+
+      <TutorialOverlay
+        isActive={tutorial.isActive}
+        currentStepIndex={tutorial.currentStepIndex}
+        totalSteps={tutorial.totalSteps}
+        currentStep={tutorial.currentStep}
+        targetRect={tutorial.targetRect}
+        secondaryRect={tutorial.secondaryRect}
+        onNext={tutorial.nextStep}
+        onPrev={tutorial.prevStep}
+        onSkip={tutorial.skipTutorial}
+      />
     </div>
   );
 }
