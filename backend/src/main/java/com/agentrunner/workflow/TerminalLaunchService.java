@@ -6,7 +6,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -33,7 +35,8 @@ public class TerminalLaunchService {
         String absScript = scriptPath.toAbsolutePath().toString();
 
         List<List<String>> candidates = new ArrayList<>();
-        candidates.add(List.of("open", "-na", "Ghostty", "--args", "-e", absScript));
+        // Use --command config option instead of -e to avoid "Allow Ghostty to execute" security prompt
+        candidates.add(List.of("open", "-na", "Ghostty", "--args", "--command=" + absScript));
         candidates.add(List.of("/usr/bin/osascript", "-e", "tell application \"Terminal\"\n"
                 + "activate\n"
                 + "do script " + toAppleScriptStringLiteral(absScript) + "\n"
@@ -120,9 +123,17 @@ public class TerminalLaunchService {
     private TerminalLaunchResult launchInMacTerminal(String projectPath, String launchCommand) {
         List<String> errors = new ArrayList<>();
 
-        // 1) Try "open -na Ghostty" via Launch Services (avoids macOS security prompt)
-        List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args", "--new-window", "-e", "/bin/zsh", "-lc", launchCommand);
+        // 1) Write command to temp script, then use --command config option
+        //    to avoid "Allow Ghostty to execute /bin/zsh?" security prompt
         try {
+            Path tempScript = Path.of(System.getProperty("java.io.tmpdir"), "agent-runner-launch.sh");
+            String escapedPath = "'" + projectPath.replace("'", "'\\''") + "'";
+            Files.writeString(tempScript, "#!/bin/zsh\ncd " + escapedPath + "\n" + launchCommand + "\nexec zsh -l\n");
+            Files.setPosixFilePermissions(tempScript, PosixFilePermissions.fromString("rwxr-xr-x"));
+
+            List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
+                    "--new-window", "--command=" + tempScript.toAbsolutePath());
+
             ProcessBuilder pb = new ProcessBuilder(ghosttyCmd);
             pb.directory(Path.of(projectPath).toFile());
             pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
