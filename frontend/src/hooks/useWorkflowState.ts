@@ -89,6 +89,7 @@ export function useWorkflowState() {
       selectedSkills: effectiveSelectedSkills, stepPrompts: prompts,
       commandStepSkills: [],
       mcpProfiles: effectiveMcpProfiles,
+      mcpProfilePath: mcpProfilePath.trim(),
       openTerminalAfter: false,
       workflowName: workflowFilePath.trim() || 'workflow',
     };
@@ -127,18 +128,6 @@ export function useWorkflowState() {
       setSkillsData(data);
       if (!root) {
         setSkillPath(normPath(data.agentRunnerRoot));
-        // MCP Profile Path도 같은 디렉터리의 mcp-profiles/ 로 초기화
-        if (!mcpProfilePath) {
-          const mcpDefault = normPath(data.agentRunnerRoot) + '/mcp-profiles';
-          setMcpProfilePath(mcpDefault);
-          try {
-            const mcpRes = await fetch(`/api/mcp/profiles?path=${encodeURIComponent(mcpDefault)}`);
-            if (mcpRes.ok) {
-              const entries: { id: string; name: string }[] = await mcpRes.json();
-              setDynamicMcpProfiles(entries.map((e) => ({ id: e.id, label: e.name, desc: '' })));
-            }
-          } catch { /* ignore */ }
-        }
       }
       const validNames = new Set(data.skills.filter((s) => s.hasSkillMd).map((s) => s.name));
       setSelectedSkills((prev) => prev.filter((n) => validNames.has(n)));
@@ -308,8 +297,8 @@ export function useWorkflowState() {
         body: JSON.stringify({
           projectPath: skillPath.trim(), issueKey: null, requestText: '', cli, dryRun: false,
           selectedSkills: [], stepPrompts: {}, commandStepSkills: [],
-          mcpProfiles: effectiveMcpProfiles, openTerminalAfter: false,
-          workflowName: selectedSavedWorkflow.name,
+          mcpProfiles: effectiveMcpProfiles, mcpProfilePath: mcpProfilePath.trim(),
+          openTerminalAfter: false, workflowName: selectedSavedWorkflow.name,
         }),
       });
       const body = await res.json();
@@ -321,11 +310,15 @@ export function useWorkflowState() {
     }
   };
 
-  // Reload saved workflows + final prompt template when skillPath changes
+  // Reload saved workflows, MCP profiles, and final prompt template when skillPath changes
   useEffect(() => {
     if (!skillPath) return;
     setWorkflowLoadPath(normPath(skillPath));
     loadSavedWorkflows(skillPath);
+    // MCP Profile Path도 skillPath 기반으로 자동 설정
+    const mcpDefault = normPath(skillPath) + '/mcp-profiles';
+    setMcpProfilePath(mcpDefault);
+    loadMcpProfiles(mcpDefault);
     // Load FINAL_PROMPT.md template
     const templatePath = normPath(skillPath) + '/FINAL_PROMPT.md';
     fetch(`/api/workflows/file/read?path=${encodeURIComponent(templatePath)}`)

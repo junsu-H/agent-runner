@@ -41,6 +41,7 @@ export type RunWorkflowRequest = {
   stepPrompts: Record<string, string>;
   commandStepSkills: string[];
   mcpProfiles: string[];
+  mcpProfilePath?: string;
   openTerminalAfter: boolean;
   workflowName?: string;
 };

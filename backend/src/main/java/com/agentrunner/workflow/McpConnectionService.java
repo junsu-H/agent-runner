@@ -34,7 +34,7 @@ public class McpConnectionService {
         String normalizedProjectPath = normalizeProjectPath(projectPath);
 
         if (applyConfig) {
-            mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, profiles);
+            mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, profiles, null);
         }
 
         return checkMcpInfoInternal(normalizedCli, normalizedProjectPath);
@@ -45,7 +45,7 @@ public class McpConnectionService {
         String normalizedProjectPath = normalizeProjectPath(projectPath);
         List<String> normalizedProfiles = mcpProfileService.normalizeProfiles(profiles);
 
-        mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, normalizedProfiles);
+        mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, normalizedProfiles, null);
 
         List<String> output = new ArrayList<>();
         output.add("MCP profiles applied");
@@ -71,7 +71,7 @@ public class McpConnectionService {
         }
 
         if (!profiles.isEmpty()) {
-            mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, profiles);
+            mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, profiles, null);
         }
 
         List<String> processCommand = buildTerminalCommand(normalizedCli, normalizedProjectPath, command);
@@ -97,7 +97,7 @@ public class McpConnectionService {
         String normalizedProjectPath = normalizeProjectPath(projectPath);
 
         if (!profiles.isEmpty()) {
-            mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, profiles);
+            mcpProfileService.applyMcpProfiles(normalizedCli, normalizedProjectPath, profiles, null);
         }
 
         try {

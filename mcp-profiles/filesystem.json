@@ -1,10 +1,11 @@
 {
   "mcpServers": {
-    "sequential-thinking": {
+    "filesystem": {
       "command": "npx",
       "args": [
         "-y",
-        "@modelcontextprotocol/server-sequential-thinking"
+        "@modelcontextprotocol/server-filesystem",
+        "./workspace"
       ]
     }
   }

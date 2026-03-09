@@ -224,7 +224,7 @@ public class WorkflowRunService {
 
         // 2. Apply MCP profiles
         if (!profiles.isEmpty()) {
-            mcpProfileService.applyMcpProfiles(normalizedCli, projectPath, profiles);
+            mcpProfileService.applyMcpProfiles(normalizedCli, projectPath, profiles, request.mcpProfilePath());
         }
 
         // 3. Write launch script + open terminal with CLI pre-fill

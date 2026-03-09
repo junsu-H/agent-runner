@@ -17,6 +17,7 @@ public record RunWorkflowRequest(
         Map<String, String> stepPrompts,
         List<String> commandStepSkills,
         List<String> mcpProfiles,
+        String mcpProfilePath,
         Boolean openTerminalAfter,
         String workflowName
 ) {

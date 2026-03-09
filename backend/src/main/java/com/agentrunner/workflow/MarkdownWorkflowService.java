@@ -86,7 +86,7 @@ public class MarkdownWorkflowService {
         }
 
         if (!workflow.mcpProfiles().isEmpty()) {
-            mcpProfileService.applyMcpProfiles(workflow.selectedCli(), workflow.projectPath(), workflow.mcpProfiles());
+            mcpProfileService.applyMcpProfiles(workflow.selectedCli(), workflow.projectPath(), workflow.mcpProfiles(), null);
         }
 
         String runId = RUN_ID_FORMAT.format(LocalDateTime.now()) + "-md-" + UUID.randomUUID().toString().substring(0, 8);

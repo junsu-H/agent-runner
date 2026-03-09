@@ -30,7 +30,7 @@ public class McpProfileService {
         this.mcpConfigWriter = mcpConfigWriter;
     }
 
-    public void applyMcpProfiles(String cli, String projectPath, List<String> profiles) {
+    public void applyMcpProfiles(String cli, String projectPath, List<String> profiles, String mcpProfilePath) {
         if (!SUPPORTED_CLI.contains(cli)) {
             return;
         }
@@ -40,8 +40,11 @@ public class McpProfileService {
             return;
         }
 
+        Path mcpProfileDir = (mcpProfilePath != null && !mcpProfilePath.isBlank())
+                ? Path.of(mcpProfilePath).toAbsolutePath().normalize()
+                : null;
         Path agentRunnerRoot = resolveAgentRunnerRoot(projectPath);
-        ObjectNode mergedConfig = mergeMcpProfiles(agentRunnerRoot, normalizedProfiles);
+        ObjectNode mergedConfig = mergeMcpProfiles(agentRunnerRoot, mcpProfileDir, normalizedProfiles);
         JsonNode serversNode = mergedConfig.path("mcpServers");
 
         if (!serversNode.isObject()) {
@@ -49,11 +52,16 @@ public class McpProfileService {
         }
 
         Path projectRoot = Path.of(normalizeProjectPath(projectPath)).toAbsolutePath().normalize();
-        mcpConfigWriter.writeClaudeMcpConfig(projectRoot, mergedConfig);
-        mcpConfigWriter.writeCopilotMcpConfig(projectRoot, mergedConfig);
-        mcpConfigWriter.writeGeminiMcpConfig(projectRoot, mergedConfig);
-        Path codexServers = mcpConfigWriter.writeCodexMcpServersToml(projectRoot, serversNode);
-        mcpConfigWriter.linkProjectCodexConfig(projectRoot, codexServers);
+        switch (cli) {
+            case "claude" -> mcpConfigWriter.writeClaudeMcpConfig(projectRoot, mergedConfig);
+            case "copilot" -> mcpConfigWriter.writeCopilotMcpConfig(projectRoot, mergedConfig);
+            case "gemini" -> mcpConfigWriter.writeGeminiMcpConfig(projectRoot, mergedConfig);
+            case "codex" -> {
+                Path codexServers = mcpConfigWriter.writeCodexMcpServersToml(projectRoot, serversNode);
+                mcpConfigWriter.linkProjectCodexConfig(projectRoot, codexServers);
+            }
+            default -> { }
+        }
     }
 
     public List<String> normalizeProfiles(List<String> profiles) {
@@ -103,12 +111,12 @@ public class McpProfileService {
         return cwd;
     }
 
-    private ObjectNode mergeMcpProfiles(Path agentRunnerRoot, List<String> profiles) {
+    private ObjectNode mergeMcpProfiles(Path agentRunnerRoot, Path mcpProfileDir, List<String> profiles) {
         ObjectNode merged = objectMapper.createObjectNode();
         int loadedProfileCount = 0;
 
         for (String profile : profiles) {
-            Path profileFile = resolveProfileFile(agentRunnerRoot, profile);
+            Path profileFile = resolveProfileFile(agentRunnerRoot, mcpProfileDir, profile);
             if (profileFile == null) {
                 continue;
             }
@@ -145,7 +153,16 @@ public class McpProfileService {
         });
     }
 
-    private Path resolveProfileFile(Path agentRunnerRoot, String profile) {
+    private Path resolveProfileFile(Path agentRunnerRoot, Path mcpProfileDir, String profile) {
+        // 1. User-specified MCP profile directory
+        if (mcpProfileDir != null) {
+            Path userProfile = mcpProfileDir.resolve(profile + ".json");
+            if (Files.isRegularFile(userProfile)) {
+                return userProfile;
+            }
+        }
+
+        // 2. skills/agent-runner-mcp-setup/profiles/
         Path mcpSetupProfile = agentRunnerRoot.resolve("skills")
                 .resolve(MCP_SETUP_SKILL_NAME)
                 .resolve("profiles")

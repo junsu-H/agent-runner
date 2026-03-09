@@ -83,7 +83,7 @@ class WorkflowRunOrchestrator {
         broadcastStatus(run);
 
         try {
-            mcpProfileService.applyMcpProfiles(request.normalizedCli(), request.projectPath(), profiles);
+            mcpProfileService.applyMcpProfiles(request.normalizedCli(), request.projectPath(), profiles, request.mcpProfilePath());
             appendOutputLine(run, "MCP profiles applied: " + String.join(", ", profiles));
             appendOutputLine(run, "cli=" + request.normalizedCli() + " projectPath=" + request.projectPath());
         } catch (Exception e) {

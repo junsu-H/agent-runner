@@ -53,7 +53,7 @@ public class WorkflowController {
                 selectedSkills == null ? List.of() : selectedSkills,
                 Map.of(),
                 commandStepSkills == null ? List.of() : commandStepSkills,
-                List.of(), false, null
+                List.of(), null, false, null
         );
 
         try {
