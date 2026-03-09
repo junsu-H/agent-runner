@@ -7,6 +7,9 @@ import com.agentrunner.skill.SkillDirectoryService;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -15,6 +18,7 @@ import java.util.Map;
 import java.util.Set;
 
 import static com.agentrunner.workflow.WorkflowUtils.SUPPORTED_CLI;
+import static com.agentrunner.workflow.WorkflowUtils.normalizePath;
 
 @Component
 public class LinkedListWorkflowFactory {
@@ -157,6 +161,38 @@ public class LinkedListWorkflowFactory {
 
     /* ── Unified single-prompt builder ── */
 
+    private static final String DEFAULT_TEMPLATE = """
+            Execute the following agent-runner workflow. Process each skill in order.
+
+            Project: {{PROJECT_PATH}}
+
+            {{#STEP}}
+            ---
+            ## Step {{STEP_NUM}}: {{SKILL_NAME}}
+            Skill folder: {{SKILL_FOLDER}}
+            Request: {{REQUEST}}
+            {{/STEP}}
+
+            ---
+
+            Rules:
+            1. For each step, read ALL files in the skill folder (SKILL.md and any other .md files).
+            2. Execute the request based on the full context from the skill folder.
+            3. Process steps in order. Complete each step fully before moving to the next.
+            """;
+
+    private String loadTemplate(String projectPath) {
+        Path templatePath = Path.of(projectPath, "WORKFLOW_TEMPLATE.md");
+        if (Files.isRegularFile(templatePath)) {
+            try {
+                return Files.readString(templatePath, StandardCharsets.UTF_8);
+            } catch (IOException e) {
+                // fallback to default
+            }
+        }
+        return DEFAULT_TEMPLATE;
+    }
+
     public UnifiedWorkflowSpec buildUnified(RunWorkflowRequest request) {
         String cli = request.normalizedCli();
         if (!SUPPORTED_CLI.contains(cli)) {
@@ -172,12 +208,19 @@ public class LinkedListWorkflowFactory {
         SkillListResponse skillCatalog = loadSkillCatalog(request.projectPath());
         Map<String, SkillDirectoryResponse> byName = indexByName(skillCatalog.skills());
 
-        StringBuilder prompt = new StringBuilder();
-        prompt.append("Execute the following agent-runner workflow. Process each skill in order.\n\n");
-        prompt.append("Project: ").append(request.projectPath()).append("\n\n");
-
+        String template = loadTemplate(request.projectPath());
         Set<String> skillDirs = new LinkedHashSet<>();
 
+        // Extract step template block
+        int stepStart = template.indexOf("{{#STEP}}");
+        int stepEnd = template.indexOf("{{/STEP}}");
+        if (stepStart < 0 || stepEnd < 0 || stepEnd <= stepStart) {
+            throw new IllegalStateException("WORKFLOW_TEMPLATE.md must contain {{#STEP}}...{{/STEP}} block");
+        }
+        String stepTemplate = template.substring(stepStart + "{{#STEP}}".length(), stepEnd);
+
+        // Render each step
+        StringBuilder stepsRendered = new StringBuilder();
         for (int i = 0; i < selectedSkills.size(); i++) {
             String selectedSkill = selectedSkills.get(i);
             SkillDirectoryResponse skill = byName.get(WorkflowPromptBuilder.normalizeSkillName(selectedSkill));
@@ -193,20 +236,22 @@ public class LinkedListWorkflowFactory {
                 throw new IllegalArgumentException("Step prompt is required for skill: " + skill.name());
             }
 
-            prompt.append("---\n");
-            prompt.append("## Step ").append(i + 1).append(": ").append(skill.name()).append("\n");
-            prompt.append("SKILL.md: ").append(skill.skillMdPath()).append("\n");
-            prompt.append("Request: ").append(rawStepPrompt.trim()).append("\n\n");
+            String rendered = stepTemplate
+                    .replace("{{STEP_NUM}}", String.valueOf(i + 1))
+                    .replace("{{SKILL_NAME}}", skill.name())
+                    .replace("{{SKILL_FOLDER}}", normalizePath(skill.path()))
+                    .replace("{{REQUEST}}", rawStepPrompt.trim());
+            stepsRendered.append(rendered);
 
             skillDirs.add(skill.path());
         }
 
-        prompt.append("---\n\n");
-        prompt.append("Rules:\n");
-        prompt.append("1. For each step, read the SKILL.md file.\n");
-        prompt.append("2. Execute the request.\n");
-        prompt.append("3. Process steps in order.\n");
+        // Assemble final prompt
+        String result = template.substring(0, stepStart)
+                + stepsRendered
+                + template.substring(stepEnd + "{{/STEP}}".length());
+        result = result.replace("{{PROJECT_PATH}}", normalizePath(request.projectPath()));
 
-        return new UnifiedWorkflowSpec(prompt.toString(), selectedSkills.size(), new ArrayList<>(skillDirs));
+        return new UnifiedWorkflowSpec(result, selectedSkills.size(), new ArrayList<>(skillDirs));
     }
 }

@@ -8,6 +8,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+import static com.agentrunner.workflow.WorkflowUtils.normalizePath;
+
 class WorkflowPromptBuilder {
 
     record PlannedStepSpec(
@@ -27,14 +29,14 @@ class WorkflowPromptBuilder {
             int stepOrder,
             int totalSteps
     ) {
-        String outputDir = request.projectPath() + "/.workflow";
+        String outputDir = normalizePath(request.projectPath()) + "/workflow";
 
         StringBuilder sb = new StringBuilder();
         sb.append("Execute agent-runner workflow step.\n\n")
                 .append("Step order: ").append(stepOrder).append(" / ").append(totalSteps).append("\n")
                 .append("Skill name: ").append(spec.skillName()).append("\n")
-                .append("Skill file: ").append(spec.skillPath()).append("\n")
-                .append("Project path: ").append(request.projectPath()).append("\n")
+                .append("Skill folder: ").append(normalizePath(spec.skillDirectoryPath())).append("\n")
+                .append("Project path: ").append(normalizePath(request.projectPath())).append("\n")
                 .append("Output directory: ").append(outputDir).append("\n")
                 .append("Global request: ").append(request.safeRequestText()).append("\n");
 
@@ -46,8 +48,8 @@ class WorkflowPromptBuilder {
                     .append("Skill item order: ").append(spec.requestItemOrder()).append(" / ").append(spec.requestItemCount()).append("\n")
                     .append("Output file: ").append(outputFile).append("\n\n")
                     .append("Rules:\n")
-                    .append("1. Read the skill file.\n")
-                    .append("2. Execute the request.\n")
+                    .append("1. Read ALL files in the skill folder (SKILL.md and any other .md files).\n")
+                    .append("2. Execute the request based on the full context.\n")
                     .append("3. Save result to ").append(outputFile).append(" (mkdir -p if needed).\n");
             return sb.toString();
         }
@@ -56,8 +58,8 @@ class WorkflowPromptBuilder {
                 .append("Skill request (full): ").append(spec.stepRequest()).append("\n")
                 .append("Output file: ").append(outputFile).append("\n\n")
                 .append("Rules:\n")
-                .append("1. Read the skill file.\n")
-                .append("2. Execute the request.\n")
+                .append("1. Read ALL files in the skill folder (SKILL.md and any other .md files).\n")
+                .append("2. Execute the request based on the full context.\n")
                 .append("3. Save result to ").append(outputFile).append(" (mkdir -p if needed).\n");
         return sb.toString();
     }

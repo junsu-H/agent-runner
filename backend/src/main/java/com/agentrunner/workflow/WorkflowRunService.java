@@ -188,7 +188,7 @@ public class WorkflowRunService {
         String baseName = request.safeWorkflowName();
 
         LinkedListWorkflowFactory.UnifiedWorkflowSpec spec = workflowFactory.buildUnified(request);
-        Path workflowDir = Path.of(projectPath, ".workflow");
+        Path workflowDir = Path.of(projectPath, "workflow");
         Files.createDirectories(workflowDir);
 
         String fileName = baseName + ".md";
@@ -217,9 +217,9 @@ public class WorkflowRunService {
         String fileName = request.safeWorkflowName() + ".md";
 
         // 1. Verify workflow file exists
-        Path workflowMd = Path.of(projectPath, ".workflow", fileName);
+        Path workflowMd = Path.of(projectPath, "workflow", fileName);
         if (!Files.isRegularFile(workflowMd)) {
-            throw new IllegalArgumentException(".workflow/" + fileName + " 파일이 없습니다. 먼저 Md 파일을 생성하세요.");
+            throw new IllegalArgumentException("workflow/" + fileName + " 파일이 없습니다. 먼저 Md 파일을 생성하세요.");
         }
 
         // 2. Apply MCP profiles
@@ -239,7 +239,7 @@ public class WorkflowRunService {
             launchResult = terminalLaunchService.launchScriptInSystemTerminal(projectPath, scriptPath);
         } else {
             String launchCommand = "cd " + shellSingleQuote(projectPath)
-                    + "; clear; echo " + shellSingleQuote("[agent-runner] .workflow/" + fileName + " → " + normalizedCli)
+                    + "; clear; echo " + shellSingleQuote("[agent-runner] workflow/" + fileName + " → " + normalizedCli)
                     + "; /bin/zsh " + shellSingleQuote(scriptPath.toAbsolutePath().toString());
             launchResult = terminalLaunchService.launchInSystemTerminal(projectPath, launchCommand);
         }

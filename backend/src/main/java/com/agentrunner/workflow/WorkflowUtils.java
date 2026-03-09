@@ -44,6 +44,10 @@ public final class WorkflowUtils {
         return List.copyOf(lines.subList(size - maxLines, size));
     }
 
+    static String normalizePath(String path) {
+        return path == null ? "" : path.replace('\\', '/');
+    }
+
     static String abbreviate(String text, int maxLength) {
         if (text == null || text.length() <= maxLength) {
             return text;

@@ -122,12 +122,40 @@ public class WorkflowController {
         }
     }
 
+    public record WorkflowFileEntry(String name, String path) {}
+
+    @GetMapping("/file/list")
+    public ResponseEntity<?> listWorkflowFiles(@RequestParam("projectPath") String projectPath) {
+        try {
+            Path workflowDir = Path.of(projectPath, "workflow");
+            if (!Files.isDirectory(workflowDir)) {
+                return ResponseEntity.ok(List.of());
+            }
+            List<WorkflowFileEntry> entries;
+            try (var stream = Files.list(workflowDir)) {
+                entries = stream
+                        .filter(p -> !Files.isDirectory(p))
+                        .filter(p -> p.getFileName().toString().endsWith(".md"))
+                        .sorted()
+                        .map(p -> {
+                            String fileName = p.getFileName().toString();
+                            String name = fileName.substring(0, fileName.length() - 3);
+                            return new WorkflowFileEntry(name, p.toAbsolutePath().normalize().toString());
+                        })
+                        .toList();
+            }
+            return ResponseEntity.ok(entries);
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError().body(Map.of("error", e.getMessage()));
+        }
+    }
+
     @GetMapping("/file/unique-name")
     public ResponseEntity<?> uniqueName(
             @RequestParam("projectPath") String projectPath,
             @RequestParam("name") String name) {
         String baseName = (name == null || name.isBlank()) ? "workflow" : name.trim();
-        Path workflowDir = Path.of(projectPath, ".workflow");
+        Path workflowDir = Path.of(projectPath, "workflow");
         String fileName = baseName + ".md";
         if (!Files.exists(workflowDir.resolve(fileName))) {
             return ResponseEntity.ok(Map.of("uniqueName", baseName, "exists", false));
