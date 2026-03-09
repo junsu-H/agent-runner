@@ -3,6 +3,12 @@ setlocal
 
 set ROOT_DIR=%~dp0
 
+:: Kill existing processes on required ports
+echo [agent-runner] Checking for existing processes...
+powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 19876 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host '[agent-runner] Killing PID' $_.OwningProcess 'on port 19876'; Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+powershell -NoProfile -Command "Get-NetTCPConnection -LocalPort 15432 -ErrorAction SilentlyContinue | ForEach-Object { Write-Host '[agent-runner] Killing PID' $_.OwningProcess 'on port 15432'; Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }"
+timeout /t 2 /nobreak >nul
+
 echo [agent-runner] Starting backend...
 cd /d "%ROOT_DIR%backend"
 start "agent-runner-backend" cmd /c "gradlew.bat bootRun --quiet"

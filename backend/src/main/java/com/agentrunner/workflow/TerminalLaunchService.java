@@ -120,8 +120,8 @@ public class TerminalLaunchService {
     private TerminalLaunchResult launchInMacTerminal(String projectPath, String launchCommand) {
         List<String> errors = new ArrayList<>();
 
-        // 1) Try direct ghostty -- fire-and-forget (GUI process, do NOT wait/kill)
-        List<String> ghosttyCmd = List.of("ghostty", "--new-window", "-e", "/bin/zsh", "-lc", launchCommand);
+        // 1) Try "open -na Ghostty" via Launch Services (avoids macOS security prompt)
+        List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args", "--new-window", "-e", "/bin/zsh", "-lc", launchCommand);
         try {
             ProcessBuilder pb = new ProcessBuilder(ghosttyCmd);
             pb.directory(Path.of(projectPath).toFile());
@@ -130,7 +130,7 @@ public class TerminalLaunchService {
             configureProcessEnvironment(pb);
             Process process = pb.start();
 
-            boolean exited = process.waitFor(1, TimeUnit.SECONDS);
+            boolean exited = process.waitFor(3, TimeUnit.SECONDS);
             if (!exited || process.exitValue() == 0) {
                 return new TerminalLaunchResult("Ghostty", String.join(" ", ghosttyCmd), List.of());
             }
@@ -144,7 +144,6 @@ public class TerminalLaunchService {
 
         // 2) Fallback candidates
         List<List<String>> candidates = new ArrayList<>();
-        candidates.add(List.of("open", "-na", "Ghostty", "--args", "-e", "/bin/zsh", "-lc", launchCommand));
         candidates.add(List.of("/usr/bin/osascript", "-e", "tell application \"Terminal\"\n"
                 + "activate\n"
                 + "do script " + toAppleScriptStringLiteral(launchCommand) + "\n"
