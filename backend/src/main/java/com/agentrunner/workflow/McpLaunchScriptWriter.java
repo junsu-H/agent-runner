@@ -50,10 +50,17 @@ final class McpLaunchScriptWriter {
             }
             cliCommand = sb.toString();
         } else if ("copilot".equals(cli)) {
-            cliCommand = "copilot";
+            Path copilotMcpConfig = Path.of(projectPath).resolve(".vscode").resolve("mcp.json");
+            if (Files.isRegularFile(copilotMcpConfig)) {
+                cliCommand = "copilot --additional-mcp-config " + shellSingleQuote(copilotMcpConfig.toString());
+            } else {
+                cliCommand = "copilot";
+            }
         } else if ("gemini".equals(cli)) {
+            // gemini reads .gemini/settings.json automatically from CWD
             cliCommand = "gemini";
         } else {
+            // codex reads .codex/config.toml automatically from CWD
             cliCommand = "codex";
         }
 
@@ -102,10 +109,17 @@ final class McpLaunchScriptWriter {
             }
             cliCommand = sb.toString();
         } else if ("copilot".equals(cli)) {
-            cliCommand = "& copilot";
+            Path copilotMcpConfig = Path.of(projectPath).resolve(".vscode").resolve("mcp.json");
+            if (Files.isRegularFile(copilotMcpConfig)) {
+                cliCommand = "& copilot --additional-mcp-config '" + copilotMcpConfig.toString().replace("'", "''") + "'";
+            } else {
+                cliCommand = "& copilot";
+            }
         } else if ("gemini".equals(cli)) {
+            // gemini reads .gemini/settings.json automatically from CWD
             cliCommand = "& gemini";
         } else {
+            // codex reads .codex/config.toml automatically from CWD
             cliCommand = "& codex";
         }
 
