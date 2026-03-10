@@ -46,7 +46,6 @@ export function WorkflowView(props: Props) {
     const fn = workflowTab === 'load' && selectedSavedWorkflow
       ? selectedSavedWorkflow.name + '.md'
       : (workflowFilePath.trim() || 'workflow') + '.md';
-    if (cli === 'codex') return `Read the file at workflow/${fn} and execute the workflow described in it`;
     if (finalPromptTemplate) return finalPromptTemplate.replace('{{WORKFLOW_FILE}}', fn);
     return `@workflow/${fn} 이 워크플로우 plan mode로 실행해 줘.`;
   };

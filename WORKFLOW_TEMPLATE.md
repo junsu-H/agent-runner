@@ -10,7 +10,6 @@ Skill folder: {{SKILL_FOLDER}}
 
 Request: {{REQUEST}}
 {{/STEP}}
-
 ---
 
 Execution Rules:

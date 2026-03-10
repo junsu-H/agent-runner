@@ -123,9 +123,6 @@ class WorkflowScriptService {
     private static final String DEFAULT_FINAL_PROMPT = "@workflow/{{WORKFLOW_FILE}} 이 워크플로우 plan mode로 실행해 줘.";
 
     String getCliPreFillText(String cli, String projectPath, String fileName) {
-        if ("codex".equals(cli)) {
-            return "Read the file at workflow/" + fileName + " and execute the workflow described in it";
-        }
         String template = loadFinalPromptTemplate(projectPath);
         return template.replace("{{WORKFLOW_FILE}}", fileName);
     }
