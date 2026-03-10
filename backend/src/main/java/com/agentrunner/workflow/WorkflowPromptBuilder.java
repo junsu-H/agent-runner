@@ -66,14 +66,25 @@ class WorkflowPromptBuilder {
 
     static List<String> buildCommand(String cli, String projectPath, String prompt, String skillDirectoryPath, boolean continueSession) {
         if ("codex".equals(cli)) {
+            // codex reads .codex/config.toml automatically from CWD
             return List.of("codex", "exec", prompt);
         }
 
         if ("copilot".equals(cli)) {
-            return List.of("copilot", "-p", prompt);
+            List<String> command = new ArrayList<>();
+            command.add("copilot");
+            command.add("-p");
+            command.add(prompt);
+            Path copilotMcpConfig = Path.of(projectPath).resolve(".vscode").resolve("mcp.json");
+            if (Files.isRegularFile(copilotMcpConfig)) {
+                command.add("--additional-mcp-config");
+                command.add(copilotMcpConfig.toString());
+            }
+            return command;
         }
 
         if ("gemini".equals(cli)) {
+            // gemini reads .gemini/settings.json automatically from CWD
             return List.of("gemini", "-p", prompt);
         }
 
