@@ -274,6 +274,21 @@ export function WorkflowView(props: Props) {
         )}
 
         <section className="card">
+          <div className="button-row">
+            <button
+              type="button"
+              onClick={() => { workflowTab === 'load' && selectedSavedWorkflow ? void openSavedWorkflowTerminal() : void openTerminal(); }}
+              disabled={!step2Done || launchingTerminal || (effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load')}
+            >
+              {launchingTerminal ? '실행 중...' : '터미널 실행'}
+            </button>
+            {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
+              <span className="muted">먼저 워크플로우 파일을 만들어 주세요</span>
+            )}
+          </div>
+        </section>
+
+        <section className="card">
           <div className="canvas-head">
             <h3>프롬프트에 직접 입력</h3>
             <button type="button" className="ghost tiny" disabled={!step2Done} onClick={() => {
@@ -287,20 +302,6 @@ export function WorkflowView(props: Props) {
           </pre>
         </section>
 
-      </div>
-
-      {/* ── Sticky 터미널 실행 ── */}
-      <div className="sticky-terminal-bar">
-        <button
-          type="button"
-          onClick={() => { workflowTab === 'load' && selectedSavedWorkflow ? void openSavedWorkflowTerminal() : void openTerminal(); }}
-          disabled={!step2Done || launchingTerminal || (effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load')}
-        >
-          {launchingTerminal ? '실행 중...' : '터미널 실행'}
-        </button>
-        {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
-          <span className="muted">먼저 워크플로우 파일을 만들어 주세요</span>
-        )}
       </div>
     </>
   );

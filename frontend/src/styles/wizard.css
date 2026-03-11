@@ -181,17 +181,3 @@
 .guide-bad { color: var(--fail); }
 .guide-good { color: var(--ok); }
 
-/* ── Sticky Terminal Bar ── */
-
-.sticky-terminal-bar {
-  position: sticky;
-  bottom: 0;
-  z-index: 100;
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  background: linear-gradient(180deg, rgba(30, 26, 50, 0.95), rgba(21, 15, 42, 0.98));
-  border-top: 1px solid rgba(139, 92, 246, 0.25);
-  backdrop-filter: blur(12px);
-}
