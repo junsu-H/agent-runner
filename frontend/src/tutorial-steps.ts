@@ -33,7 +33,7 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
   },
   {
     target: '#step-3',
-    secondaryTarget: '.skill-picker',
+    secondaryTarget: '#skill-palette',
     title: '4. 스킬 선택',
     description: '어떤 스킬을 사용할지 경로를 정하고, 좌측에 나오는 스킬들을 클릭하여 워크플로우 캔버스를 생성해 주세요.',
     placement: 'bottom',
