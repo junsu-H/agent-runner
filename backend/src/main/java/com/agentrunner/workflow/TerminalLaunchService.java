@@ -11,6 +11,7 @@ import java.nio.file.Path;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static com.agentrunner.workflow.WorkflowUtils.*;
@@ -33,16 +34,46 @@ public class TerminalLaunchService {
 
     private TerminalLaunchResult launchScriptInMacTerminal(String projectPath, Path scriptPath) {
         String absScript = scriptPath.toAbsolutePath().toString();
+        List<String> errors = new ArrayList<>();
 
+        // Wrap in a self-deleting temp script so Ghostty's window restoration
+        // does not re-execute the CLI command when reopened from Finder.
+        try {
+            String wrapperName = "agent-runner-launch-" + UUID.randomUUID().toString().substring(0, 8) + ".sh";
+            Path wrapperScript = Path.of(System.getProperty("java.io.tmpdir"), wrapperName);
+            String selfDelete = "rm -f '" + wrapperScript.toAbsolutePath().toString().replace("'", "'\\''") + "'";
+            Files.writeString(wrapperScript, "#!/bin/zsh\n" + selfDelete + "\nexec " + "'" + absScript.replace("'", "'\\''") + "'" + "\n");
+            Files.setPosixFilePermissions(wrapperScript, PosixFilePermissions.fromString("rwxr-xr-x"));
+
+            List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
+                    "--command=" + wrapperScript.toAbsolutePath());
+
+            ProcessBuilder pb = new ProcessBuilder(ghosttyCmd);
+            pb.directory(Path.of(projectPath).toFile());
+            pb.redirectOutput(ProcessBuilder.Redirect.DISCARD);
+            pb.redirectError(ProcessBuilder.Redirect.DISCARD);
+            configureProcessEnvironment(pb);
+            Process process = pb.start();
+
+            boolean exited = process.waitFor(3, TimeUnit.SECONDS);
+            if (!exited || process.exitValue() == 0) {
+                return new TerminalLaunchResult("Ghostty", String.join(" ", ghosttyCmd), List.of());
+            }
+            errors.add("Ghostty: exit=" + process.exitValue());
+        } catch (IOException e) {
+            errors.add("Ghostty: " + e.getMessage());
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            errors.add("Ghostty: interrupted");
+        }
+
+        // Fallback: Terminal.app via AppleScript
         List<List<String>> candidates = new ArrayList<>();
-        // Use --command config option instead of -e to avoid "Allow Ghostty to execute" security prompt
-        candidates.add(List.of("open", "-na", "Ghostty", "--args", "--command=" + absScript));
         candidates.add(List.of("/usr/bin/osascript", "-e", "tell application \"Terminal\"\n"
                 + "activate\n"
                 + "do script " + toAppleScriptStringLiteral(absScript) + "\n"
                 + "end tell"));
 
-        List<String> errors = new ArrayList<>();
         for (List<String> candidate : candidates) {
             McpCommandResult result = runCommand(candidate, projectPath, 20);
             if (!result.timedOut() && result.exitCode() == 0) {
@@ -126,9 +157,11 @@ public class TerminalLaunchService {
         // 1) Write command to temp script, then use --command config option
         //    to avoid "Allow Ghostty to execute /bin/zsh?" security prompt
         try {
-            Path tempScript = Path.of(System.getProperty("java.io.tmpdir"), "agent-runner-launch.sh");
+            String scriptName = "agent-runner-launch-" + UUID.randomUUID().toString().substring(0, 8) + ".sh";
+            Path tempScript = Path.of(System.getProperty("java.io.tmpdir"), scriptName);
             String escapedPath = "'" + projectPath.replace("'", "'\\''") + "'";
-            Files.writeString(tempScript, "#!/bin/zsh\ncd " + escapedPath + "\n" + launchCommand + "\nexec zsh -l\n");
+            String selfDelete = "rm -f " + "'" + tempScript.toAbsolutePath().toString().replace("'", "'\\''") + "'";
+            Files.writeString(tempScript, "#!/bin/zsh\n" + selfDelete + "\ncd " + escapedPath + "\n" + launchCommand + "\nexec zsh -l\n");
             Files.setPosixFilePermissions(tempScript, PosixFilePermissions.fromString("rwxr-xr-x"));
 
             List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
