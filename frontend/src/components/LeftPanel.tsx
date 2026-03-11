@@ -79,7 +79,7 @@ export function LeftPanel(props: Props) {
       {view === 'workflow' && (
         <>
           {/* Skill Palette */}
-          <div className="group">
+          <div id="skill-palette" className="group">
             <div className="skills-head-left">
               <label className="group-title">Skill Palette (Drag)</label>
             </div>
