@@ -41,7 +41,11 @@ public class TerminalLaunchService {
         try {
             String wrapperName = "agent-runner-launch-" + UUID.randomUUID().toString().substring(0, 8) + ".sh";
             Path wrapperScript = Path.of(System.getProperty("java.io.tmpdir"), wrapperName);
-            Files.writeString(wrapperScript, "#!/bin/zsh\nexec " + "'" + absScript.replace("'", "'\\''") + "'" + "\n");
+            // Self-replace: on first run, overwrite this script to a plain shell launcher
+            // so Ghostty Cmd+D split panes just open zsh instead of re-running the command.
+            Files.writeString(wrapperScript, "#!/bin/zsh\n"
+                    + "printf '#!/bin/zsh\\nexec zsh -l\\n' > \"$0\"\n"
+                    + "exec " + "'" + absScript.replace("'", "'\\''") + "'" + "\n");
             Files.setPosixFilePermissions(wrapperScript, PosixFilePermissions.fromString("rwxr-xr-x"));
 
             List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
@@ -159,7 +163,11 @@ public class TerminalLaunchService {
             String scriptName = "agent-runner-launch-" + UUID.randomUUID().toString().substring(0, 8) + ".sh";
             Path tempScript = Path.of(System.getProperty("java.io.tmpdir"), scriptName);
             String escapedPath = "'" + projectPath.replace("'", "'\\''") + "'";
-            Files.writeString(tempScript, "#!/bin/zsh\ncd " + escapedPath + "\n" + launchCommand + "\nexec zsh -l\n");
+            // Self-replace: on first run, overwrite this script to a plain shell launcher
+            // so Ghostty Cmd+D split panes just open zsh instead of re-running the command.
+            Files.writeString(tempScript, "#!/bin/zsh\n"
+                    + "printf '#!/bin/zsh\\nexec zsh -l\\n' > \"$0\"\n"
+                    + "cd " + escapedPath + "\n" + launchCommand + "\nexec zsh -l\n");
             Files.setPosixFilePermissions(tempScript, PosixFilePermissions.fromString("rwxr-xr-x"));
 
             List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
