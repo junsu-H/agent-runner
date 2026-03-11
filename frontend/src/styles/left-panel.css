@@ -132,7 +132,7 @@ button:disabled {
 }
 
 .main-panel {
-  padding: 20px;
+  padding: 20px 36px 20px 20px;
 }
 
 .card {
@@ -227,11 +227,15 @@ button:disabled {
 }
 
 .made-by {
-  margin: -4px 0 0;
+  margin: 8px 0 0;
   text-align: center;
-  font-size: 11px;
-  color: rgba(139, 92, 246, 0.4);
-  letter-spacing: 0.04em;
+  font-size: 24px;
+  font-weight: 700;
+  background: linear-gradient(135deg, #34d399, #38bdf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.06em;
 }
 
 /* ── Horizontal Progress ── */
