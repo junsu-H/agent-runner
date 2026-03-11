@@ -277,7 +277,9 @@ export function WorkflowView(props: Props) {
 
         {!step2Done && (
           <section className="card">
-            <p className="muted" style={{ margin: 0, fontSize: 13 }}>스킬과 프롬프트를 먼저 입력하세요.</p>
+            <p className="muted" style={{ margin: 0, fontSize: 13 }}>
+              {workflowTab === 'load' ? '워크플로우를 먼저 선택하세요.' : '스킬과 프롬프트를 먼저 입력하세요.'}
+            </p>
           </section>
         )}
 
@@ -290,10 +292,10 @@ export function WorkflowView(props: Props) {
             >
               {launchingTerminal ? '실행 중...' : '터미널 실행'}
             </button>
-            {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
-              <span className="muted">먼저 워크플로우 파일을 만들어 주세요</span>
-            )}
           </div>
+          {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
+            <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>먼저 워크플로우 파일을 만들어 주세요.</p>
+          )}
         </section>
 
         <section className="card">
