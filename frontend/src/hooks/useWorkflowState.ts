@@ -338,13 +338,14 @@ export function useWorkflowState() {
   }, [effectiveMcpProfiles]);
 
   /* ── Progress ── */
-  const step1Done = effectiveSelectedSkills.length > 0;
-  const step2Done = step1Done && effectiveSelectedSkills.every((s) => !!stepPrompts[s]?.trim());
+  const isLoadMode = workflowTab === 'load';
+  const step1Done = isLoadMode ? !!selectedSavedWorkflow : effectiveSelectedSkills.length > 0;
+  const step2Done = isLoadMode ? !!selectedSavedWorkflow : (step1Done && effectiveSelectedSkills.every((s) => !!stepPrompts[s]?.trim()));
   const step3Done = step2Done && !!generatedFile;
   const progressPercent = step3Done ? 100 : step2Done ? 66 : step1Done ? 33 : 0;
 
   return {
-    cli, setCli, skillPath, setSkillPath, reloadSkillsFromPath,
+    isLoadMode, cli, setCli, skillPath, setSkillPath, reloadSkillsFromPath,
     mcpProfilePath, reloadMcpProfilesFromPath, activeMcpProfileOptions,
     workflowFilePath, setWorkflowFilePath, workflowNameDuplicate,
     view, setView, skillsData, selectedSkills, activeSkill, setActiveSkill,
