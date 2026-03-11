@@ -115,7 +115,6 @@ export function WorkflowView(props: Props) {
         <h3 className="wizard-section-title">
           <span className="wizard-section-num">3</span>
           프롬프트 입력
-          {!activeSkill && <span className="wizard-section-hint">(스킬을 먼저 추가해 주세요)</span>}
         </h3>
 
         {effectiveSelectedSkills.length > 0 && (
@@ -141,6 +140,12 @@ export function WorkflowView(props: Props) {
             <div className="skill-detail">
               <textarea rows={5} value={activeSkillPrompt} onChange={(e) => updateStepPrompt(activeSkill, e.target.value)} className="main-textarea" placeholder="이 스킬과 함께 사용할 프롬프트를 적어주세요" />
             </div>
+          </section>
+        )}
+
+        {!activeSkill && (
+          <section className="card">
+            <p className="muted" style={{ margin: 0, fontSize: 13 }}>스킬을 먼저 추가해 주세요.</p>
           </section>
         )}
 
@@ -174,7 +179,7 @@ export function WorkflowView(props: Props) {
               <div style={{ marginBottom: 8 }}>
                 <label className="muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>불러올 경로</label>
                 <div className="project-path-row">
-                  <input className="project-path-input" value={workflowLoadPath ? `${workflowLoadPath}/workflow` : ''} readOnly placeholder="경로를 선택하세요" />
+                  <input className="project-path-input" value={workflowLoadPath || ''} readOnly placeholder="경로를 선택하세요" />
                   <button type="button" className="tiny ghost-light project-path-browse" onClick={() => setWfBrowserOpen(true)}>찾기</button>
                 </div>
               </div>
@@ -260,6 +265,12 @@ export function WorkflowView(props: Props) {
 
         {error && <p className="error-inline">{error}</p>}
 
+        {!step2Done && (
+          <section className="card">
+            <p className="muted" style={{ margin: 0, fontSize: 13 }}>스킬과 프롬프트를 먼저 입력하세요.</p>
+          </section>
+        )}
+
         <section className="card">
           <div className="canvas-head">
             <h3>프롬프트에 직접 입력</h3>
@@ -270,12 +281,11 @@ export function WorkflowView(props: Props) {
             }}>{copied ? '✓ 복사됨' : '클립보드에 복사'}</button>
           </div>
           <pre className="file-preview" style={!step2Done ? { opacity: 0.4 } : undefined}>
-            {step2Done ? getPromptText() : '스킬과 프롬프트를 먼저 입력하세요.'}
+            {step2Done ? getPromptText() : ''}
           </pre>
         </section>
 
         <section className="card">
-          <h3>터미널 실행</h3>
           <div className="button-row">
             <button
               type="button"
@@ -284,9 +294,6 @@ export function WorkflowView(props: Props) {
             >
               {launchingTerminal ? '실행 중...' : '터미널 실행'}
             </button>
-            {!step2Done && (
-              <span className="muted">스킬과 프롬프트를 먼저 입력하세요</span>
-            )}
             {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
               <span className="muted">먼저 워크플로우 파일을 만들어 주세요</span>
             )}
