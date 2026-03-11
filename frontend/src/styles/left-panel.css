@@ -133,6 +133,8 @@ button:disabled {
 
 .main-panel {
   padding: 20px 36px 20px 20px;
+  overflow-y: auto;
+  max-height: 100vh;
 }
 
 .card {

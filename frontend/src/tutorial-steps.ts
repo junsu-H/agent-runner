@@ -60,4 +60,11 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     placement: 'top',
     panel: 'main',
   },
+  {
+    target: '.made-by',
+    title: '만든 사람',
+    description: 'junsu-H',
+    placement: 'right',
+    panel: 'left',
+  },
 ];
