@@ -313,12 +313,12 @@ export function WorkflowView(props: Props) {
             <button
               type="button"
               onClick={() => { isLoad && selectedSavedWorkflow ? void openSavedWorkflowTerminal() : void openTerminal(); }}
-              disabled={!step2Done || launchingTerminal || (effectiveSelectedSkills.length > 1 && !generatedFile && !isLoad)}
+              disabled={!step2Done || launchingTerminal || (!generatedFile && !isLoad)}
             >
               {launchingTerminal ? '실행 중...' : '터미널 실행'}
             </button>
           </div>
-          {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && !isLoad && (
+          {step2Done && !generatedFile && !isLoad && (
             <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>먼저 워크플로우 파일을 만들어 주세요.</p>
           )}
         </section>
