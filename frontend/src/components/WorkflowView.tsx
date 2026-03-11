@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { WorkflowState } from '../hooks/useWorkflowState';
 import { FolderBrowserModal } from './FolderBrowserModal';
 
@@ -41,6 +41,12 @@ export function WorkflowView(props: Props) {
   const [mcpBrowserOpen, setMcpBrowserOpen] = useState(false);
   const [wfBrowserOpen, setWfBrowserOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [previewExpanded, setPreviewExpanded] = useState(false);
+
+  // Auto-expand preview when content is loaded
+  useEffect(() => {
+    if (generatedFileContent) setPreviewExpanded(true);
+  }, [generatedFileContent]);
 
   const isLoad = workflowTab === 'load';
 
@@ -103,6 +109,19 @@ export function WorkflowView(props: Props) {
                       {wf.name}.md
                     </button>
                   ))}
+                </div>
+              )}
+              {selectedSavedWorkflow && generatedFileContent && (
+                <div style={{ marginTop: 8 }}>
+                  <div className="canvas-head">
+                    <p className="execution-phase-status">{selectedSavedWorkflow.name}.md</p>
+                    <button type="button" className="ghost tiny" onClick={() => setPreviewExpanded((v) => !v)}>
+                      {previewExpanded ? '접기' : '펼치기'}
+                    </button>
+                  </div>
+                  {previewExpanded && (
+                    <pre className="file-preview">{generatedFileContent}</pre>
+                  )}
                 </div>
               )}
             </>
@@ -262,9 +281,13 @@ export function WorkflowView(props: Props) {
               <section className="card">
                 <div className="canvas-head">
                   <p className="execution-phase-status">{generatedFile}</p>
-                  <button type="button" className="ghost tiny" onClick={() => setGeneratedFileContent(null)}>닫기</button>
+                  <button type="button" className="ghost tiny" onClick={() => setPreviewExpanded((v) => !v)}>
+                    {previewExpanded ? '접기' : '펼치기'}
+                  </button>
                 </div>
-                <pre className="file-preview">{generatedFileContent}</pre>
+                {previewExpanded && (
+                  <pre className="file-preview">{generatedFileContent}</pre>
+                )}
               </section>
             )}
           </div>
