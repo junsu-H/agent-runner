@@ -19,13 +19,13 @@ export function TutorialOverlay({
 }: Props) {
   if (!isActive || !currentStep) return null;
 
-  const pad = currentStep.spotlightPadding ?? 8;
+  const pad = currentStep.spotlightPadding ?? 14;
   const isLast = currentStepIndex === totalSteps - 1;
 
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
+  const vw = document.documentElement.clientWidth;
+  const vh = document.documentElement.clientHeight;
 
-  // Cutout rects
+  // Cutout rects — expand outward by padding
   const makeCut = (rect: DOMRect, p: number) => ({
     x: rect.left - p, y: rect.top - p,
     w: rect.width + p * 2, h: rect.height + p * 2, rx: 12,

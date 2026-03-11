@@ -16,7 +16,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     description: '필수 설치 항목들을 설치해 주세요. 설치가 완료되면 체크 표시가 나타납니다.',
     placement: 'right',
     panel: 'left',
-    spotlightPadding: 6,
   },
   {
     target: '#step-1',
@@ -39,7 +38,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     description: '스킬들을 클릭하여 어떤 프롬프트를 요청할지 적어주세요.',
     placement: 'bottom',
     panel: 'main',
-    spotlightPadding: 4,
   },
   {
     target: '#step-3 .wf-tabs',
@@ -48,7 +46,6 @@ export const TUTORIAL_STEPS: TutorialStep[] = [
     description: '해당 프롬프트를 체이닝해서 만들 workflow 경로와 파일명을 정해 주세요. 기존에 파일이 있다면 불러오기를 클릭하시면 됩니다.',
     placement: 'bottom',
     panel: 'main',
-    spotlightPadding: 12,
   },
   {
     target: '#step-4',
