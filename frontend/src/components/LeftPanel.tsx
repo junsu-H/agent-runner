@@ -78,6 +78,43 @@ export function LeftPanel(props: Props) {
 
       {view === 'workflow' && (
         <>
+          {/* Prerequisites */}
+          <div className="group prerequisites-group">
+            <div className="prereq-header">
+              <label className="group-title">필수 설치 항목</label>
+              <button type="button" className="tiny ghost-light" onClick={() => { void checkPrereqs(); }}>새로고침</button>
+            </div>
+            <ul className="prerequisites-list">
+              {prereqs.map((p) => {
+                const st = installStates[p.id] ?? 'idle';
+                return (
+                  <li key={p.id} className={p.installed ? 'prereq-installed' : ''}>
+                    <span className="prereq-name">
+                      {p.installed ? <span className="prereq-ok">&#10003;</span> : <span className="prereq-miss">&#10007;</span>}
+                      {p.name}
+                      {p.optional && <span className="prereq-optional">선택</span>}
+                    </span>
+                    {p.installed ? (
+                      <span className="prereq-version">{p.version}</span>
+                    ) : p.installCmd ? (
+                      <button
+                        type="button"
+                        className="prereq-install-btn"
+                        disabled={st === 'installing'}
+                        onClick={() => { void installPrereq(p.id); }}
+                      >
+                        {st === 'installing' ? '설치 중...' : st === 'failed' ? '재시도' : '설치'}
+                      </button>
+                    ) : (
+                      <span className="prereq-hint">ghostty.org</span>
+                    )}
+                  </li>
+                );
+              })}
+              {prereqs.length === 0 && <li className="prereq-loading">확인 중...</li>}
+            </ul>
+          </div>
+
           {/* Skill Palette */}
           <div id="skill-palette" className="group">
             <div className="skills-head-left">
@@ -134,43 +171,6 @@ export function LeftPanel(props: Props) {
               </div>
             </div>
           )}
-
-          {/* Prerequisites */}
-          <div className="group prerequisites-group">
-            <div className="prereq-header">
-              <label className="group-title">필수 설치 항목</label>
-              <button type="button" className="tiny ghost-light" onClick={() => { void checkPrereqs(); }}>새로고침</button>
-            </div>
-            <ul className="prerequisites-list">
-              {prereqs.map((p) => {
-                const st = installStates[p.id] ?? 'idle';
-                return (
-                  <li key={p.id} className={p.installed ? 'prereq-installed' : ''}>
-                    <span className="prereq-name">
-                      {p.installed ? <span className="prereq-ok">&#10003;</span> : <span className="prereq-miss">&#10007;</span>}
-                      {p.name}
-                      {p.optional && <span className="prereq-optional">선택</span>}
-                    </span>
-                    {p.installed ? (
-                      <span className="prereq-version">{p.version}</span>
-                    ) : p.installCmd ? (
-                      <button
-                        type="button"
-                        className="prereq-install-btn"
-                        disabled={st === 'installing'}
-                        onClick={() => { void installPrereq(p.id); }}
-                      >
-                        {st === 'installing' ? '설치 중...' : st === 'failed' ? '재시도' : '설치'}
-                      </button>
-                    ) : (
-                      <span className="prereq-hint">ghostty.org</span>
-                    )}
-                  </li>
-                );
-              })}
-              {prereqs.length === 0 && <li className="prereq-loading">확인 중...</li>}
-            </ul>
-          </div>
 
           {/* Horizontal Progress */}
           {progressSteps && progressSteps.length > 0 && (
