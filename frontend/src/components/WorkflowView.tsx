@@ -42,8 +42,10 @@ export function WorkflowView(props: Props) {
   const [wfBrowserOpen, setWfBrowserOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
+  const isLoad = workflowTab === 'load';
+
   const getPromptText = () => {
-    const fn = workflowTab === 'load' && selectedSavedWorkflow
+    const fn = isLoad && selectedSavedWorkflow
       ? selectedSavedWorkflow.name + '.md'
       : (workflowFilePath.trim() || 'workflow') + '.md';
     if (finalPromptTemplate) return finalPromptTemplate.replace('{{WORKFLOW_FILE}}', fn);
@@ -108,11 +110,53 @@ export function WorkflowView(props: Props) {
         </section>
       </div>
 
+      {/* ── Section 3: MCP 선택 ── */}
+      <div id="step-3" className="wizard-section">
+        <h3 className="wizard-section-title"><span className="wizard-section-num">3</span>MCP 선택</h3>
+
+        <section className="card">
+          <label className="muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>MCP Profile Path</label>
+          <div className="project-path-row">
+            <input className="project-path-input" value={mcpProfilePath} readOnly placeholder="MCP 프로필 JSON 경로를 선택하세요" />
+            <button type="button" className="tiny ghost-light project-path-browse" onClick={() => setMcpBrowserOpen(true)}>찾기</button>
+          </div>
+        </section>
+
+        <FolderBrowserModal browserOpen={mcpBrowserOpen} setBrowserOpen={setMcpBrowserOpen} initialPath={mcpProfilePath} onConfirm={reloadMcpProfilesFromPath} title="MCP 프로필 폴더 선택" />
+
+        <section className="card mcp-setup-card">
+          <div className="mcp-profile-header">
+            <p className="mcp-toggle-title">MCP 프로필</p>
+            <div className="mcp-summary-row">
+              <span className="mcp-summary-pill">selected {effectiveMcpProfiles.length}</span>
+              {effectiveMcpProfiles.length < activeMcpProfileOptions.length
+                ? <button type="button" className="ghost tiny" onClick={() => toggleAllMcpProfiles(true)}>전체 선택</button>
+                : <button type="button" className="ghost tiny" onClick={() => toggleAllMcpProfiles(false)}>전체 해제</button>
+              }
+            </div>
+          </div>
+
+          <div className="mcp-profile-groups">
+            <div className="mcp-profile-group">
+              <div className="mcp-profile-grid">
+                {activeMcpProfileOptions.map((profile) => (
+                  <label key={profile.id} className="mcp-profile-item">
+                    <input type="checkbox" checked={effectiveMcpProfiles.includes(profile.id)} onChange={(e) => toggleMcpProfile(profile.id, e.target.checked)} />
+                    <span className="mcp-profile-name">{profile.label}</span>
+                    {profile.desc && <span className="mcp-profile-desc">{profile.desc}</span>}
+                  </label>
+                ))}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
       {workflowTab === 'create' && (
         <>
-          {/* ── Section 3: 스킬 선택 ── */}
-          <div id="step-3" className="wizard-section">
-            <h3 className="wizard-section-title"><span className="wizard-section-num">3</span>스킬 선택</h3>
+          {/* ── Section 4: 스킬 선택 ── */}
+          <div id="step-4" className="wizard-section">
+            <h3 className="wizard-section-title"><span className="wizard-section-num">4</span>스킬 선택</h3>
 
             <section className="card">
               <label className="muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>Skill Path</label>
@@ -155,10 +199,10 @@ export function WorkflowView(props: Props) {
             </section>
           </div>
 
-          {/* ── Section 4: 프롬프트 입력 ── */}
-          <div id="step-4" className="wizard-section">
+          {/* ── Section 5: 프롬프트 입력 ── */}
+          <div id="step-5" className="wizard-section">
             <h3 className="wizard-section-title">
-              <span className="wizard-section-num">4</span>
+              <span className="wizard-section-num">5</span>
               프롬프트 입력
             </h3>
 
@@ -227,58 +271,16 @@ export function WorkflowView(props: Props) {
         </>
       )}
 
-      {/* ── MCP 선택 ── */}
-      <div id="step-5" className="wizard-section">
-        <h3 className="wizard-section-title"><span className="wizard-section-num">{workflowTab === 'load' ? 3 : 5}</span>MCP 선택</h3>
-
-        <section className="card">
-          <label className="muted" style={{ fontSize: 12, display: 'block', marginBottom: 4 }}>MCP Profile Path</label>
-          <div className="project-path-row">
-            <input className="project-path-input" value={mcpProfilePath} readOnly placeholder="MCP 프로필 JSON 경로를 선택하세요" />
-            <button type="button" className="tiny ghost-light project-path-browse" onClick={() => setMcpBrowserOpen(true)}>찾기</button>
-          </div>
-        </section>
-
-        <FolderBrowserModal browserOpen={mcpBrowserOpen} setBrowserOpen={setMcpBrowserOpen} initialPath={mcpProfilePath} onConfirm={reloadMcpProfilesFromPath} title="MCP 프로필 폴더 선택" />
-
-        <section className="card mcp-setup-card">
-          <div className="mcp-profile-header">
-            <p className="mcp-toggle-title">MCP 프로필</p>
-            <div className="mcp-summary-row">
-              <span className="mcp-summary-pill">selected {effectiveMcpProfiles.length}</span>
-              {effectiveMcpProfiles.length < activeMcpProfileOptions.length
-                ? <button type="button" className="ghost tiny" onClick={() => toggleAllMcpProfiles(true)}>전체 선택</button>
-                : <button type="button" className="ghost tiny" onClick={() => toggleAllMcpProfiles(false)}>전체 해제</button>
-              }
-            </div>
-          </div>
-
-          <div className="mcp-profile-groups">
-            <div className="mcp-profile-group">
-              <div className="mcp-profile-grid">
-                {activeMcpProfileOptions.map((profile) => (
-                  <label key={profile.id} className="mcp-profile-item">
-                    <input type="checkbox" checked={effectiveMcpProfiles.includes(profile.id)} onChange={(e) => toggleMcpProfile(profile.id, e.target.checked)} />
-                    <span className="mcp-profile-name">{profile.label}</span>
-                    {profile.desc && <span className="mcp-profile-desc">{profile.desc}</span>}
-                  </label>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-      </div>
-
-      {/* ── Section 6: 실행 ── */}
+      {/* ── 실행 ── */}
       <div id="step-6" className="wizard-section">
-        <h3 className="wizard-section-title"><span className="wizard-section-num">{workflowTab === 'load' ? 4 : 6}</span>실행</h3>
+        <h3 className="wizard-section-title"><span className="wizard-section-num">{isLoad ? 4 : 6}</span>실행</h3>
 
         {error && <p className="error-inline">{error}</p>}
 
         {!step2Done && (
           <section className="card">
             <p className="muted" style={{ margin: 0, fontSize: 13 }}>
-              {workflowTab === 'load' ? '워크플로우를 먼저 선택하세요.' : '스킬과 프롬프트를 먼저 입력하세요.'}
+              {isLoad ? '워크플로우를 먼저 선택하세요.' : '스킬과 프롬프트를 먼저 입력하세요.'}
             </p>
           </section>
         )}
@@ -287,13 +289,13 @@ export function WorkflowView(props: Props) {
           <div className="button-row">
             <button
               type="button"
-              onClick={() => { workflowTab === 'load' && selectedSavedWorkflow ? void openSavedWorkflowTerminal() : void openTerminal(); }}
-              disabled={!step2Done || launchingTerminal || (effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load')}
+              onClick={() => { isLoad && selectedSavedWorkflow ? void openSavedWorkflowTerminal() : void openTerminal(); }}
+              disabled={!step2Done || launchingTerminal || (effectiveSelectedSkills.length > 1 && !generatedFile && !isLoad)}
             >
               {launchingTerminal ? '실행 중...' : '터미널 실행'}
             </button>
           </div>
-          {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && workflowTab !== 'load' && (
+          {step2Done && effectiveSelectedSkills.length > 1 && !generatedFile && !isLoad && (
             <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>먼저 워크플로우 파일을 만들어 주세요.</p>
           )}
         </section>
