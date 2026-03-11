@@ -21,15 +21,15 @@ export function App() {
     const base = [
       { id: 'step-1', label: 'CLI', done: true },
       { id: 'step-2', label: '워크플로우', done: isLoad ? !!state.selectedSavedWorkflow : !!state.generatedFile },
+      { id: 'step-3', label: 'MCP', done: state.step3Done },
     ];
     if (!isLoad) {
       base.push(
-        { id: 'step-3', label: '스킬', done: state.step1Done },
-        { id: 'step-4', label: '프롬프트', done: state.step2Done },
+        { id: 'step-4', label: '스킬', done: state.step1Done },
+        { id: 'step-5', label: '프롬프트', done: state.step2Done },
       );
     }
     base.push(
-      { id: 'step-5', label: 'MCP', done: state.step3Done },
       { id: 'step-6', label: '실행', done: state.step3Done },
     );
     return base;
