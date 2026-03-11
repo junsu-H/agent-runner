@@ -36,13 +36,12 @@ public class TerminalLaunchService {
         String absScript = scriptPath.toAbsolutePath().toString();
         List<String> errors = new ArrayList<>();
 
-        // Wrap in a self-deleting temp script so Ghostty's window restoration
-        // does not re-execute the CLI command when reopened from Finder.
+        // Wrap in a UUID-named temp script so Ghostty's window restoration
+        // does not re-use a stale fixed-path script.
         try {
             String wrapperName = "agent-runner-launch-" + UUID.randomUUID().toString().substring(0, 8) + ".sh";
             Path wrapperScript = Path.of(System.getProperty("java.io.tmpdir"), wrapperName);
-            String selfDelete = "rm -f '" + wrapperScript.toAbsolutePath().toString().replace("'", "'\\''") + "'";
-            Files.writeString(wrapperScript, "#!/bin/zsh\n" + selfDelete + "\nexec " + "'" + absScript.replace("'", "'\\''") + "'" + "\n");
+            Files.writeString(wrapperScript, "#!/bin/zsh\nexec " + "'" + absScript.replace("'", "'\\''") + "'" + "\n");
             Files.setPosixFilePermissions(wrapperScript, PosixFilePermissions.fromString("rwxr-xr-x"));
 
             List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
@@ -160,8 +159,7 @@ public class TerminalLaunchService {
             String scriptName = "agent-runner-launch-" + UUID.randomUUID().toString().substring(0, 8) + ".sh";
             Path tempScript = Path.of(System.getProperty("java.io.tmpdir"), scriptName);
             String escapedPath = "'" + projectPath.replace("'", "'\\''") + "'";
-            String selfDelete = "rm -f " + "'" + tempScript.toAbsolutePath().toString().replace("'", "'\\''") + "'";
-            Files.writeString(tempScript, "#!/bin/zsh\n" + selfDelete + "\ncd " + escapedPath + "\n" + launchCommand + "\nexec zsh -l\n");
+            Files.writeString(tempScript, "#!/bin/zsh\ncd " + escapedPath + "\n" + launchCommand + "\nexec zsh -l\n");
             Files.setPosixFilePermissions(tempScript, PosixFilePermissions.fromString("rwxr-xr-x"));
 
             List<String> ghosttyCmd = List.of("open", "-na", "Ghostty", "--args",
